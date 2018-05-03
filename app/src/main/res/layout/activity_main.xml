@@ -4,7 +4,7 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="@android:color/black"
+    android:background="#34353b"
     tools:context="com.example.alex.dvrone.MainActivity">
 
     <SurfaceView
@@ -25,9 +25,9 @@
 
         <ImageButton
             android:id="@+id/imageButtonRecord"
-            android:layout_width="47dp"
-            android:layout_height="47dp"
-            android:layout_margin="20dp"
+            android:layout_width="55dp"
+            android:layout_height="55dp"
+            android:layout_margin="30dp"
             android:background="@drawable/roundedbutton"
             android:onClick="onClickRecord"
             android:scaleType="centerInside"
@@ -37,9 +37,9 @@
 
         <ImageButton
             android:id="@+id/imageButtonPhoto"
-            android:layout_width="47dp"
-            android:layout_height="47dp"
-            android:layout_margin="20dp"
+            android:layout_width="55dp"
+            android:layout_height="55dp"
+            android:layout_margin="30dp"
             android:background="@drawable/roundedbutton"
             android:onClick="onClickPicture"
             android:scaleType="centerInside"

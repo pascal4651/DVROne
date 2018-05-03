@@ -17,6 +17,7 @@ import android.os.BatteryManager;
 import android.os.Build;
 import android.os.Environment;
 import android.preference.PreferenceManager;
+import android.support.constraint.ConstraintLayout;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AppCompatActivity;
@@ -53,7 +54,7 @@ public class MainActivity extends AppCompatActivity {
     private TextView stopWatchText;
     private int degrees;
     private StopWatch sw;
-    private int CAMERA_ID = 1;
+    private int CAMERA_ID = 0;
     private boolean FULL_SCREEN = true;
     public static final int MEDIA_TYPE_IMAGE = 1;
     public static final int MEDIA_TYPE_VIDEO = 2;
@@ -63,6 +64,7 @@ public class MainActivity extends AppCompatActivity {
     private boolean useChargerConnection;
     private boolean isExternalStorage;
     private int camProfile;
+    private int rotate;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -102,19 +104,17 @@ public class MainActivity extends AppCompatActivity {
         holder.addCallback(new SurfaceHolder.Callback() {
             @Override
             public void surfaceCreated(SurfaceHolder surfaceHolder) {
-                try {
-                    camera.setPreviewDisplay(holder);
-                    camera.startPreview();
-                } catch (Exception e) {
-                    e.printStackTrace();
-                }
             }
 
             @Override
             public void surfaceChanged(SurfaceHolder surfaceHolder, int i, int i1, int i2) {
-                camera.stopPreview();
+            // stop preview before making changes
+                try {
+                    camera.stopPreview();
+                } catch (Exception e){
+                    // ignore: tried to stop a non-existent preview
+                }
                 setPreviewSize(FULL_SCREEN);
-
                 setCameraDisplayOrientation(CAMERA_ID);
                 try {
                     camera.setPreviewDisplay(holder);
@@ -123,10 +123,8 @@ public class MainActivity extends AppCompatActivity {
                     e.printStackTrace();
                 }
             }
-
             @Override
             public void surfaceDestroyed(SurfaceHolder surfaceHolder) {
-
             }
         });
 
@@ -353,6 +351,7 @@ public class MainActivity extends AppCompatActivity {
         mediaRecorder.setCamera(camera);
         mediaRecorder.setAudioSource(MediaRecorder.AudioSource.CAMCORDER);
         mediaRecorder.setVideoSource(MediaRecorder.VideoSource.CAMERA);
+        mediaRecorder.setOrientationHint(rotate);
         mediaRecorder.setProfile(CamcorderProfile.get(camProfile));
 
         mediaRecorder.setOutputFile(videoFile.getAbsolutePath());
@@ -440,13 +439,12 @@ public class MainActivity extends AppCompatActivity {
 
         // initiate media scan and put the new things into the path array to
         // make the scanner aware of the location and the files you want to see
-        MediaScannerConnection.scanFile(this, new String[] {mediaFile.toString()}, null, null);
+        MediaScannerConnection.scanFile(this, new String[] {mediaFile.getPath()}, null, null);
 
         return mediaFile;
     }
 
     void setPreviewSize(boolean fullScreen) {
-
         // get screen size
         Display display = getWindowManager().getDefaultDisplay();
         boolean widthIsMax = display.getWidth() > display.getHeight();
@@ -468,60 +466,70 @@ public class MainActivity extends AppCompatActivity {
             // vertical preview
             rectPreview.set(0, 0, size.height, size.width);
         }
-
         Matrix matrix = new Matrix();
         // make ready matrix to convert
         if (!fullScreen) {
-            matrix.setRectToRect(rectPreview, rectDisplay,
-                    Matrix.ScaleToFit.START);
+            matrix.setRectToRect(rectPreview, rectDisplay, Matrix.ScaleToFit.START);
         } else {
-            matrix.setRectToRect(rectDisplay, rectPreview,
-                    Matrix.ScaleToFit.START);
+            matrix.setRectToRect(rectDisplay, rectPreview, Matrix.ScaleToFit.START);
             matrix.invert(matrix);
         }
         // convert
         matrix.mapRect(rectPreview);
 
         // set surface size
-        surfaceView.getLayoutParams().height = (int) (rectPreview.bottom);
-        surfaceView.getLayoutParams().width = (int) (rectPreview.right);
+        //surfaceView.getLayoutParams().height = (int)(rectPreview.bottom);
+        //surfaceView.getLayoutParams().width = (int)(rectPreview.right);
+        surfaceView.setLayoutParams(new ConstraintLayout.LayoutParams((int)(rectPreview.right), (int)(rectPreview.bottom)));
     }
 
     void setCameraDisplayOrientation(int cameraId) {
-        //check screen rotation
-        int rotation = getWindowManager().getDefaultDisplay().getRotation();
-        degrees = 0;
-        switch (rotation) {
-            case Surface.ROTATION_0:
-                degrees = 0;
-                break;
-            case Surface.ROTATION_90:
-                degrees = 90;
-                break;
-            case Surface.ROTATION_180:
-                degrees = 180;
-                break;
-            case Surface.ROTATION_270:
-                degrees = 270;
-                break;
-        }
-        int result = 0;
+        try {
+            Camera.CameraInfo camInfo = new Camera.CameraInfo();
 
-        // get camera info
-        Camera.CameraInfo info = new Camera.CameraInfo();
-        Camera.getCameraInfo(cameraId, info);
-
-        // back camera
-        if (info.facing == Camera.CameraInfo.CAMERA_FACING_BACK) {
-            result = ((360 - degrees) + info.orientation);
-        } else
-            // front camera
-            if (info.facing == Camera.CameraInfo.CAMERA_FACING_FRONT) {
-                result = ((360 - degrees) - info.orientation);
-                result += 360;
+            if (cameraId == 0)
+                Camera.getCameraInfo(Camera.CameraInfo.CAMERA_FACING_BACK, camInfo);
+            else
+                Camera.getCameraInfo(Camera.CameraInfo.CAMERA_FACING_FRONT, camInfo);
+            int cameraRotationOffset = camInfo.orientation;
+            Camera.Parameters parameters = camera.getParameters();
+            int rotation = getWindowManager().getDefaultDisplay().getRotation();
+            int degrees = 0;
+            switch (rotation) {
+                case Surface.ROTATION_0:
+                    degrees = 0;
+                    break; // Natural orientation
+                case Surface.ROTATION_90:
+                    degrees = 90;
+                    break; // Landscape left
+                case Surface.ROTATION_180:
+                    degrees = 180;
+                    break;// Upside down
+                case Surface.ROTATION_270:
+                    degrees = 270;
+                    break;// Landscape right
             }
-        result = result % 360;
-        camera.setDisplayOrientation(result);
+            int displayRotation;
+            if (camInfo.facing == Camera.CameraInfo.CAMERA_FACING_FRONT) {
+                displayRotation = (cameraRotationOffset + degrees) % 360;
+                displayRotation = (360 - displayRotation) % 360; // compensate
+                // the
+                // mirror
+            } else { // back-facing
+                displayRotation = (cameraRotationOffset - degrees + 360) % 360;
+            }
+
+            camera.setDisplayOrientation(displayRotation);
+            if (camInfo.facing == Camera.CameraInfo.CAMERA_FACING_FRONT) {
+                rotate = (360 + cameraRotationOffset + degrees) % 360;
+            } else {
+                rotate = (360 + cameraRotationOffset - degrees) % 360;
+            }
+            parameters.set("orientation", "portrait");
+            parameters.setRotation(rotate);
+            camera.setParameters(parameters);
+
+        } catch (Exception e) { }
     }
 
     public boolean isChargerConnected(Context context) {
