@@ -67,7 +67,6 @@ public class MainActivity extends AppCompatActivity {
     private boolean isExternalStorage;
     private int camProfile;
     private int rotate;
-    private File videoFile;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -83,6 +82,16 @@ public class MainActivity extends AppCompatActivity {
                 != PackageManager.PERMISSION_GRANTED)
             {
                 ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.READ_EXTERNAL_STORAGE},1);
+            }
+            if(ContextCompat.checkSelfPermission(this,Manifest.permission.WRITE_EXTERNAL_STORAGE)
+                    != PackageManager.PERMISSION_GRANTED)
+            {
+                ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.WRITE_EXTERNAL_STORAGE},1);
+            }
+            if(ContextCompat.checkSelfPermission(this,Manifest.permission.RECORD_AUDIO)
+                    != PackageManager.PERMISSION_GRANTED)
+            {
+                ActivityCompat.requestPermissions(this,new String[]{Manifest.permission.RECORD_AUDIO},1);
             }
 
         }
@@ -187,6 +196,7 @@ public class MainActivity extends AppCompatActivity {
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
+
         // Inflate the menu; this adds items to the action bar if it is present.
         getMenuInflater().inflate(R.menu.main, menu);
         return true;
@@ -196,6 +206,7 @@ public class MainActivity extends AppCompatActivity {
     public boolean onOptionsItemSelected(MenuItem item)
     {
         Intent intent;
+
         switch (item.getItemId())
         {
             case R.id.gallery:
@@ -305,14 +316,8 @@ public class MainActivity extends AppCompatActivity {
     public void onClickRecord(View view){
         if(isRecording){
             if (mediaRecorder != null) {
-                try {
-                    mediaRecorder.stop();
-                } catch(RuntimeException e) {
-                    videoFile.delete();
-                } finally {
-                    mediaRecorder.release();
-                    mediaRecorder = null;
-                }
+                mediaRecorder.stop();
+                releaseMediaRecorder();
             }
             sw.stop();
             recordTimer = 0;
@@ -348,7 +353,7 @@ public class MainActivity extends AppCompatActivity {
 
     private boolean prepareVideoRecorder() {
 
-        videoFile = getOutputMediaFile(2);
+        File videoFile = getOutputMediaFile(2);
         Toast toast = Toast.makeText(this, videoFile.toString(), Toast.LENGTH_SHORT);
         toast.setGravity(Gravity.CENTER, 0, 0);
         toast.show();
@@ -484,15 +489,21 @@ public class MainActivity extends AppCompatActivity {
         // make ready matrix to convert
         if (!fullScreen) {
             matrix.setRectToRect(rectPreview, rectDisplay, Matrix.ScaleToFit.START);
+
+
         } else {
             matrix.setRectToRect(rectDisplay, rectPreview, Matrix.ScaleToFit.START);
             matrix.invert(matrix);
+            surfaceView.setLayoutParams(new ConstraintLayout.LayoutParams((int)(rectPreview.right), (int)(rectPreview.bottom)));
         }
         // convert
         matrix.mapRect(rectPreview);
 
         // set surface size
-        surfaceView.setLayoutParams(new ConstraintLayout.LayoutParams((int)(rectPreview.right), (int)(rectPreview.bottom)));
+        //surfaceView.getLayoutParams().height = (int)(rectPreview.bottom);
+        //surfaceView.getLayoutParams().width = (int)(rectPreview.right);
+
+
     }
 
     void setCameraDisplayOrientation(int cameraId) {
@@ -528,7 +539,9 @@ public class MainActivity extends AppCompatActivity {
             int displayRotation;
             if (camInfo.facing == Camera.CameraInfo.CAMERA_FACING_FRONT) {
                 displayRotation = (cameraRotationOffset + degrees) % 360;
-                displayRotation = (360 - displayRotation) % 360; // compensate the mirror
+                displayRotation = (360 - displayRotation) % 360; // compensate
+                // the
+                // mirror
             } else { // back-facing
                 displayRotation = (cameraRotationOffset - degrees + 360) % 360;
             }

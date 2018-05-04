@@ -1,12 +1,20 @@
 package com.example.alex.dvrone;
 
 import android.content.Context;
+import android.content.Intent;
 import android.net.Uri;
 import android.os.Bundle;
+import android.os.Environment;
 import android.support.v4.app.Fragment;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.AdapterView;
+import android.widget.GridView;
+import android.widget.Toast;
+
+import java.io.File;
 
 
 /**
@@ -17,7 +25,12 @@ import android.view.ViewGroup;
  * Use the {@link PhotoFragment#newInstance} factory method to
  * create an instance of this fragment.
  */
+
+
 public class PhotoFragment extends Fragment {
+
+    String path = (Environment.getExternalStorageDirectory() + "/DVROne/Photo");
+    File[] files;
     // TODO: Rename parameter arguments, choose names that match
     // the fragment initialization parameters, e.g. ARG_ITEM_NUMBER
     private static final String ARG_PARAM1 = "param1";
@@ -58,13 +71,37 @@ public class PhotoFragment extends Fragment {
             mParam1 = getArguments().getString(ARG_PARAM1);
             mParam2 = getArguments().getString(ARG_PARAM2);
         }
+
+
+
     }
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         // Inflate the layout for this fragment
-        return inflater.inflate(R.layout.fragment_photo, container, false);
+
+        View view = inflater.inflate(R.layout.fragment_photo, container, false);
+
+        Log.d("Files", "Path: " + path);
+        File directory = new File(path);
+        files = directory.listFiles();
+        Log.d("Files", "Size: "+ files.length);
+        for (int i = 0; i < files.length; i++)
+        {
+            Log.d("Files", "FileName:" + files[i].getName());
+        }
+
+        GridView gridview = (GridView) view.findViewById(R.id.gridview);
+        gridview.setAdapter(new ImageAdapter(this.getContext(),files));
+
+        gridview.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+            public void onItemClick(AdapterView<?> parent, View v,
+                                    int position, long id) {
+
+            }
+        });
+        return view;
     }
 
     // TODO: Rename method, update argument and hook method into UI event
@@ -104,5 +141,11 @@ public class PhotoFragment extends Fragment {
     public interface OnFragmentInteractionListener {
         // TODO: Update argument type and name
         void onFragmentInteraction(Uri uri);
+
+    }
+
+    @Override
+    public void onActivityResult(int requestCode, int resultCode, Intent data) {
+
     }
 }
