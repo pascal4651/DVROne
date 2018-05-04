@@ -1,7 +1,9 @@
 package com.example.alex.dvrone;
 
 import android.content.Context;
+import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
+import android.media.ThumbnailUtils;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.BaseAdapter;
@@ -53,8 +55,8 @@ public class ImageAdapter extends BaseAdapter {
             textView = new TextView(mContext);
         }
 
-
-        imageView.setImageBitmap(BitmapFactory.decodeFile(mThumbIds[position].getAbsolutePath()));
+        Bitmap ThumbImage = ThumbnailUtils.extractThumbnail(BitmapFactory.decodeFile(mThumbIds[position].getAbsolutePath()),50 ,50);
+        imageView.setImageBitmap(ThumbImage);
         textView.setText(mThumbIds[position].getName());
         return imageView;
     }
