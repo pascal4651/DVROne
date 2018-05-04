@@ -1,5 +1,6 @@
 package com.example.alex.dvrone;
 
+import android.content.Context;
 import android.net.Uri;
 import android.support.v4.view.ViewPager;
 import android.support.v7.app.AppCompatActivity;
@@ -11,6 +12,8 @@ import android.view.MenuItem;
 
 public class GalleryActivity extends AppCompatActivity implements PhotoFragment.OnFragmentInteractionListener,
         VideoFragment.OnFragmentInteractionListener {
+
+    public Context share = this;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {

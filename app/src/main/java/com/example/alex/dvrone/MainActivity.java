@@ -81,6 +81,16 @@ public class MainActivity extends AppCompatActivity {
             {
                 ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.READ_EXTERNAL_STORAGE},1);
             }
+            if(ContextCompat.checkSelfPermission(this,Manifest.permission.WRITE_EXTERNAL_STORAGE)
+                    != PackageManager.PERMISSION_GRANTED)
+            {
+                ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.WRITE_EXTERNAL_STORAGE},1);
+            }
+            if(ContextCompat.checkSelfPermission(this,Manifest.permission.RECORD_AUDIO)
+                    != PackageManager.PERMISSION_GRANTED)
+            {
+                ActivityCompat.requestPermissions(this,new String[]{Manifest.permission.RECORD_AUDIO},1);
+            }
 
         }
 
@@ -470,9 +480,12 @@ public class MainActivity extends AppCompatActivity {
         // make ready matrix to convert
         if (!fullScreen) {
             matrix.setRectToRect(rectPreview, rectDisplay, Matrix.ScaleToFit.START);
+
+
         } else {
             matrix.setRectToRect(rectDisplay, rectPreview, Matrix.ScaleToFit.START);
             matrix.invert(matrix);
+            surfaceView.setLayoutParams(new ConstraintLayout.LayoutParams((int)(rectPreview.right), (int)(rectPreview.bottom)));
         }
         // convert
         matrix.mapRect(rectPreview);
@@ -480,7 +493,8 @@ public class MainActivity extends AppCompatActivity {
         // set surface size
         //surfaceView.getLayoutParams().height = (int)(rectPreview.bottom);
         //surfaceView.getLayoutParams().width = (int)(rectPreview.right);
-        surfaceView.setLayoutParams(new ConstraintLayout.LayoutParams((int)(rectPreview.right), (int)(rectPreview.bottom)));
+
+
     }
 
     void setCameraDisplayOrientation(int cameraId) {
