@@ -22,30 +22,33 @@
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent">
 
-
-        <ImageButton
-            android:id="@+id/imageButtonRecord"
-            android:layout_width="55dp"
-            android:layout_height="55dp"
+        <Button
+            android:id="@+id/buttonRecord"
+            android:layout_width="70dp"
+            android:layout_height="70dp"
             android:layout_margin="30dp"
             android:background="@drawable/roundedbutton"
+            android:drawableTop="@drawable/rec"
             android:onClick="onClickRecord"
-            android:scaleType="centerInside"
+            android:text="resolut"
+            android:textColor="#ffffff"
+            android:textSize="8dp"
             app:layout_constraintBottom_toBottomOf="parent"
-            app:layout_constraintStart_toStartOf="parent"
-            app:srcCompat="@drawable/record" />
+            app:layout_constraintStart_toStartOf="parent" />
 
-        <ImageButton
-            android:id="@+id/imageButtonPhoto"
-            android:layout_width="55dp"
-            android:layout_height="55dp"
+        <Button
+            android:id="@+id/buttonPhoto"
+            android:layout_width="70dp"
+            android:layout_height="70dp"
             android:layout_margin="30dp"
             android:background="@drawable/roundedbutton"
+            android:drawableTop="@drawable/cam"
             android:onClick="onClickPicture"
-            android:scaleType="centerInside"
+            android:text="resolut"
+            android:textColor="#ffffff"
+            android:textSize="8dp"
             app:layout_constraintBottom_toBottomOf="parent"
-            app:layout_constraintStart_toStartOf="parent"
-            app:srcCompat="@drawable/camera1" />
+            app:layout_constraintStart_toStartOf="parent" />
     </LinearLayout>
 
     <LinearLayout
@@ -66,6 +69,5 @@
             android:textSize="28sp"
             android:visibility="invisible" />
     </LinearLayout>
-
 
 </android.support.constraint.ConstraintLayout>

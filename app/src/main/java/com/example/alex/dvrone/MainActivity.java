@@ -33,6 +33,7 @@ import android.view.SurfaceView;
 import android.view.View;
 import android.view.Window;
 import android.view.WindowManager;
+import android.widget.Button;
 import android.widget.ImageButton;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -41,13 +42,14 @@ import java.io.File;
 import java.io.FileOutputStream;
 import java.text.SimpleDateFormat;
 import java.util.Date;
+import java.util.List;
 
 public class MainActivity extends AppCompatActivity {
 
     private SurfaceView surfaceView;
     private Camera camera;
     private MediaRecorder mediaRecorder;
-    private ImageButton recordImageButton;
+    private Button recordButton, photoButton;
     private SurfaceHolder holder;
     private boolean isRecording;
     private Thread timeThread;
@@ -94,7 +96,8 @@ public class MainActivity extends AppCompatActivity {
         setContentView(R.layout.activity_main);
 
         surfaceView = findViewById(R.id.surfaceView);
-        recordImageButton = findViewById(R.id.imageButtonRecord);
+        recordButton = findViewById(R.id.buttonRecord);
+        photoButton = findViewById(R.id.buttonPhoto);
         stopWatchText = findViewById(R.id.textViewStopWatch);
         sp = PreferenceManager.getDefaultSharedPreferences(this);
         sw = new StopWatch();
@@ -152,8 +155,8 @@ public class MainActivity extends AppCompatActivity {
                                     if(videoLengthSeconds > 0){
                                         recordTimer++;
                                         if(recordTimer >= videoLengthSeconds){
-                                            recordImageButton.performClick();
-                                            recordImageButton.performClick();
+                                            recordButton.performClick();
+                                            recordButton.performClick();
                                             recordTimer = 0;
                                         }
                                     }
@@ -177,7 +180,7 @@ public class MainActivity extends AppCompatActivity {
                 Toast toast = Toast.makeText(this, "Charger is disconnected", Toast.LENGTH_SHORT);
                 toast.setGravity(Gravity.CENTER, 0, 0);
                 toast.show();
-                recordImageButton.performClick();
+                recordButton.performClick();
             }
         }
     }
@@ -278,7 +281,7 @@ public class MainActivity extends AppCompatActivity {
 
     public void onClickPicture(View view) {
         if(isRecording){
-            recordImageButton.performClick();
+            recordButton.performClick();
         }
         final File photoFile = getOutputMediaFile(1);
         Toast toast = Toast.makeText(this, photoFile.toString(), Toast.LENGTH_SHORT);
@@ -315,7 +318,7 @@ public class MainActivity extends AppCompatActivity {
             recordTimer = 0;
             stopWatchText.setVisibility(View.INVISIBLE);
             isRecording = false;
-            recordImageButton.setImageResource(R.drawable.record);
+            recordButton.setCompoundDrawablesWithIntrinsicBounds(null, getResources().getDrawable(R.drawable.rec), null, null);
             Toast toast = Toast.makeText(this, "PAUSED", Toast.LENGTH_SHORT);
             toast.setGravity(Gravity.CENTER, 0, 0);
             toast.show();
@@ -335,7 +338,7 @@ public class MainActivity extends AppCompatActivity {
                 isRecording = true;
                 sw.start();
                 stopWatchText.setVisibility(View.VISIBLE);
-                recordImageButton.setImageResource(R.drawable.pause);
+                recordButton.setCompoundDrawablesWithIntrinsicBounds(null, getResources().getDrawable(R.drawable.paus), null, null);
                 getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
             } else {
                 releaseMediaRecorder();
@@ -454,8 +457,14 @@ public class MainActivity extends AppCompatActivity {
         Display display = getWindowManager().getDefaultDisplay();
         boolean widthIsMax = display.getWidth() > display.getHeight();
 
+        Camera.Parameters parameters = camera.getParameters();
+        // Check what resolutions are supported by your camera
+        List<Camera.Size> pictureSizes = parameters.getSupportedPictureSizes();
+        List<Camera.Size> videoSizes = parameters.getSupportedVideoSizes();
+
         // get camera preview size
         Camera.Size size = camera.getParameters().getPreviewSize();
+
 
         RectF rectDisplay = new RectF();
         RectF rectPreview = new RectF();
@@ -496,8 +505,12 @@ public class MainActivity extends AppCompatActivity {
                 Camera.getCameraInfo(Camera.CameraInfo.CAMERA_FACING_FRONT, camInfo);
             int cameraRotationOffset = camInfo.orientation;
             Camera.Parameters parameters = camera.getParameters();
+
+            // Check what resolutions are supported by your camera
+            List<Camera.Size> sizes = parameters.getSupportedPictureSizes();
+
             int rotation = getWindowManager().getDefaultDisplay().getRotation();
-            int degrees = 0;
+            //int degrees = 0;
             switch (rotation) {
                 case Surface.ROTATION_0:
                     degrees = 0;
@@ -529,6 +542,13 @@ public class MainActivity extends AppCompatActivity {
             parameters.set("orientation", "portrait");
             parameters.setRotation(rotate);
             camera.setParameters(parameters);
+
+            Camera.Size pictureSize = camera.getParameters().getPictureSize();
+            Camera.Size videoSize = camera.getParameters().getPreviewSize();
+
+            photoButton.setText(pictureSize.width + "x" + pictureSize.height);
+            recordButton.setText(videoSize.width + "x" + videoSize.height);
+
 
         } catch (Exception e) { }
     }
