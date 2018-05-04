@@ -67,6 +67,7 @@ public class MainActivity extends AppCompatActivity {
     private boolean isExternalStorage;
     private int camProfile;
     private int rotate;
+    private File videoFile;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -316,8 +317,14 @@ public class MainActivity extends AppCompatActivity {
     public void onClickRecord(View view){
         if(isRecording){
             if (mediaRecorder != null) {
-                mediaRecorder.stop();
-                releaseMediaRecorder();
+                try{
+                    mediaRecorder.stop();
+                } catch (Exception e){
+                    videoFile.delete();
+                } finally {
+                    releaseMediaRecorder();
+                    mediaRecorder = null;
+                }
             }
             sw.stop();
             recordTimer = 0;
@@ -353,7 +360,7 @@ public class MainActivity extends AppCompatActivity {
 
     private boolean prepareVideoRecorder() {
 
-        File videoFile = getOutputMediaFile(2);
+        videoFile = getOutputMediaFile(2);
         Toast toast = Toast.makeText(this, videoFile.toString(), Toast.LENGTH_SHORT);
         toast.setGravity(Gravity.CENTER, 0, 0);
         toast.show();
@@ -489,21 +496,15 @@ public class MainActivity extends AppCompatActivity {
         // make ready matrix to convert
         if (!fullScreen) {
             matrix.setRectToRect(rectPreview, rectDisplay, Matrix.ScaleToFit.START);
-
-
         } else {
             matrix.setRectToRect(rectDisplay, rectPreview, Matrix.ScaleToFit.START);
             matrix.invert(matrix);
-            surfaceView.setLayoutParams(new ConstraintLayout.LayoutParams((int)(rectPreview.right), (int)(rectPreview.bottom)));
         }
         // convert
         matrix.mapRect(rectPreview);
 
         // set surface size
-        //surfaceView.getLayoutParams().height = (int)(rectPreview.bottom);
-        //surfaceView.getLayoutParams().width = (int)(rectPreview.right);
-
-
+        surfaceView.setLayoutParams(new ConstraintLayout.LayoutParams((int)(rectPreview.right), (int)(rectPreview.bottom)));
     }
 
     void setCameraDisplayOrientation(int cameraId) {
