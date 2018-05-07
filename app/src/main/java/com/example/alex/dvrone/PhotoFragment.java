@@ -31,6 +31,7 @@ public class PhotoFragment extends Fragment {
 
     String path = (Environment.getExternalStorageDirectory() + "/DVROne/Photo");
     File[] files;
+    String[] fileNames;
     // TODO: Rename parameter arguments, choose names that match
     // the fragment initialization parameters, e.g. ARG_ITEM_NUMBER
     private static final String ARG_PARAM1 = "param1";
@@ -86,14 +87,15 @@ public class PhotoFragment extends Fragment {
         Log.d("Files", "Path: " + path);
         File directory = new File(path);
         files = directory.listFiles();
+        fileNames = new String[files.length];
         Log.d("Files", "Size: "+ files.length);
         for (int i = 0; i < files.length; i++)
         {
-            Log.d("Files", "FileName:" + files[i].getName());
+            fileNames[i] = files[i].getName();
         }
 
         GridView gridview = (GridView) view.findViewById(R.id.gridview);
-        gridview.setAdapter(new ImageAdapter(this.getContext(),files));
+        gridview.setAdapter(new testImgAdapter(this.getContext(),files,fileNames));
 
         gridview.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             public void onItemClick(AdapterView<?> parent, View v,

@@ -55,7 +55,7 @@ public class ImageAdapter extends BaseAdapter {
             textView = new TextView(mContext);
         }
 
-        Bitmap ThumbImage = ThumbnailUtils.extractThumbnail(BitmapFactory.decodeFile(mThumbIds[position].getAbsolutePath()),50 ,50);
+        Bitmap ThumbImage = ThumbnailUtils.extractThumbnail(BitmapFactory.decodeFile(mThumbIds[position].getAbsolutePath()),300 ,300);
         imageView.setImageBitmap(ThumbImage);
         textView.setText(mThumbIds[position].getName());
         return imageView;
