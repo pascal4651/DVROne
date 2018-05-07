@@ -221,6 +221,10 @@ public class MainActivity extends AppCompatActivity {
                 intent = new Intent(this, SettingsActivity.class);
                 startActivity(intent);
                 return true;
+            case R.id.about:
+                intent = new Intent(this, AboutActivity.class);
+                startActivity(intent);
+                return true;
             case R.id.exit:
                 finish();
                 System.exit(0);
@@ -261,15 +265,29 @@ public class MainActivity extends AppCompatActivity {
         Camera.Parameters parameters = camera.getParameters();
         // Check what resolutions are supported by your camera
         List<Camera.Size> pictureSizes = parameters.getSupportedPictureSizes();
+        Camera.Size csFirst = pictureSizes.get(0);
+        Camera.Size csLast = pictureSizes.get(pictureSizes.size() - 1);
         if(cameraPictureHeight.equals("max")){
-            Camera.Size cs = pictureSizes.get(0);
-            parameters.setPictureSize(cs.width, cs.height);
+            if(csFirst.width > csLast.width){
+                parameters.setPictureSize(csFirst.width, csFirst.height);
+            } else{
+                parameters.setPictureSize(csLast.width, csLast.height);
+            }
         } else{
             int cameraPictureSizeInt = Integer.parseInt(cameraPictureHeight);
+            boolean setMaxSize = true;
             for(Camera.Size cs : pictureSizes){
                 if(cameraPictureSizeInt == cs.height){
                     parameters.setPictureSize(cs.width, cs.height);
+                    setMaxSize = false;
                     break;
+                }
+            }
+            if(setMaxSize){
+                if(csFirst.width > csLast.width){
+                    parameters.setPictureSize(csFirst.width, csFirst.height);
+                } else{
+                    parameters.setPictureSize(csLast.width, csLast.height);
                 }
             }
         }
