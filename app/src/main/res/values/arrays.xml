@@ -20,34 +20,34 @@
     </string-array>
 
     <string-array name="photoSizeLabel">
-        <item>"13M pixels"</item>
-        <item>"8M pixels"</item>
-        <item>"5M pixels"</item>
-        <item>"3M pixels"</item>
-        <item>"2M pixels"</item>
-        <item>"1.3M pixels"</item>
-        <item>"1M pixels"</item>
-        <item>"720x480"</item>
-        <item>"VGA"</item>
-        <item>"QVGA"</item>
+        <item>"320x240(0.08 MP)"</item>
+        <item>"480x320(0.15MP)"</item>
+        <item>"640x480(0.31MP)"</item>
+        <item>"1280x720(0.92MP)"</item>
+        <item>"1920x1080(2.1MP)"</item>
+        <item>"2592x1944(5MP)"</item>
+        <item>"3920x2204(8.6MP)"</item>
+        <item>"3920x2940(11.5MP)"</item>
+        <item>"4128x3096(12.8MP)"</item>
+        <item>"Max"</item>
     </string-array>
     <string-array name="photoSizeValue">
-        <item>"13M"</item>
-        <item>"8M"</item>
-        <item>"5M"</item>
-        <item>"3M"</item>
-        <item>"2M"</item>
-        <item>"1.3M"</item>
-        <item>"1M"</item>
+        <item>"240"</item>
+        <item>"320"</item>
+        <item>"480"</item>
         <item>"720"</item>
-        <item>"VGA"</item>
-        <item>"QVGA"</item>
+        <item>"1080"</item>
+        <item>"1944"</item>
+        <item>"2204"</item>
+        <item>"2940"</item>
+        <item>"3096"</item>
+        <item>"max"</item>
     </string-array>
 
     <string-array name="videoQualityLabel">
         <item>"High Quality (HQ)"</item>
         <item>"Low Quality (LQ)"</item>
-        <item>"HD 1080p (1920x108)"</item>
+        <item>"HD 1080p (1920x1080)</item>
         <item>"HD 720p (1280x720)"</item>
         <item>"ED 480p (720x480)"</item>
     </string-array>

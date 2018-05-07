@@ -66,7 +66,7 @@
             android:key="photoSizeKey"
             android:entries="@array/photoSizeLabel"
             android:entryValues="@array/photoSizeValue"
-            android:defaultValue="8M"
+            android:defaultValue="3096"
             android:summary="%s"
             android:title="Picture Size"/>
     </PreferenceCategory>

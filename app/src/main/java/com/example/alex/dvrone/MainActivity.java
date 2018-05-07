@@ -35,6 +35,7 @@ import android.view.Window;
 import android.view.WindowManager;
 import android.widget.Button;
 import android.widget.ImageButton;
+import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -50,6 +51,7 @@ public class MainActivity extends AppCompatActivity {
     private Camera camera;
     private MediaRecorder mediaRecorder;
     private Button recordButton, photoButton;
+    private ImageView focusImage;
     private SurfaceHolder holder;
     private boolean isRecording;
     private Thread timeThread;
@@ -109,6 +111,7 @@ public class MainActivity extends AppCompatActivity {
         recordButton = findViewById(R.id.buttonRecord);
         photoButton = findViewById(R.id.buttonPhoto);
         stopWatchText = findViewById(R.id.textViewStopWatch);
+        focusImage = findViewById(R.id.imageViewFocus);
         sp = PreferenceManager.getDefaultSharedPreferences(this);
         sw = new StopWatch();
         isRecording = false;
@@ -250,7 +253,29 @@ public class MainActivity extends AppCompatActivity {
             }
         }
         camera = Camera.open(CAMERA_ID);
-        camera.startPreview();
+        String camerePictureHight = sp.getString("photoSizeKey", "max");
+        setCameraResolutions(camerePictureHight);
+    }
+
+    public void setCameraResolutions(String cameraPictureHeight){
+        Camera.Parameters parameters = camera.getParameters();
+        // Check what resolutions are supported by your camera
+        List<Camera.Size> pictureSizes = parameters.getSupportedPictureSizes();
+        if(cameraPictureHeight.equals("max")){
+            Camera.Size cs = pictureSizes.get(0);
+            parameters.setPictureSize(cs.width, cs.height);
+        } else{
+            int cameraPictureSizeInt = Integer.parseInt(cameraPictureHeight);
+            for(Camera.Size cs : pictureSizes){
+                if(cameraPictureSizeInt == cs.height){
+                    parameters.setPictureSize(cs.width, cs.height);
+                    break;
+                }
+            }
+        }
+        camera.setParameters(parameters);
+        Camera.Size pictureSize = camera.getParameters().getPictureSize();
+        photoButton.setText(pictureSize.width + "x" + pictureSize.height);
     }
 
     public void setCamcorderProfile(String videoQuality){
@@ -269,6 +294,8 @@ public class MainActivity extends AppCompatActivity {
                 break;
             default: camProfile = CamcorderProfile.QUALITY_HIGH;
         }
+        CamcorderProfile cm = CamcorderProfile.get(camProfile);
+        recordButton.setText(cm.videoFrameWidth + "x" + cm.videoFrameHeight);
     }
 
     @Override
@@ -295,22 +322,26 @@ public class MainActivity extends AppCompatActivity {
         if(isRecording){
             recordButton.performClick();
         }
-        final File photoFile = getOutputMediaFile(1);
-        Toast toast = Toast.makeText(this, photoFile.toString(), Toast.LENGTH_SHORT);
-        toast.setGravity(Gravity.CENTER, 0, 0);
-        toast.show();
-        camera.takePicture(null, null, new Camera.PictureCallback() {
-            @Override
-            public void onPictureTaken(byte[] data, Camera camera) {
-                try {
-                    FileOutputStream fos = new FileOutputStream(photoFile);
-                    fos.write(data);
-                    fos.close();
-                } catch (Exception e) {
-                    e.printStackTrace();
+        try{
+            final File photoFile = getOutputMediaFile(1);
+            camera.takePicture(null, null, new Camera.PictureCallback() {
+                @Override
+                public void onPictureTaken(byte[] data, Camera camera) {
+                    try {
+                        FileOutputStream fos = new FileOutputStream(photoFile);
+                        fos.write(data);
+                        fos.close();
+                    } catch (Exception e) {
+                        e.printStackTrace();
+                    }
                 }
-            }
-        });
+            });
+            Toast toast = Toast.makeText(this, photoFile.toString(), Toast.LENGTH_SHORT);
+            toast.setGravity(Gravity.CENTER, 0, 0);
+            toast.show();
+        }catch (Exception e){
+            e.printStackTrace();
+        }
         camera.startPreview();
     }
 
@@ -321,6 +352,7 @@ public class MainActivity extends AppCompatActivity {
                     mediaRecorder.stop();
                 } catch (Exception e){
                     videoFile.delete();
+                    e.printStackTrace();
                 } finally {
                     releaseMediaRecorder();
                     mediaRecorder = null;
@@ -376,6 +408,8 @@ public class MainActivity extends AppCompatActivity {
 
         mediaRecorder.setOutputFile(videoFile.getAbsolutePath());
         mediaRecorder.setPreviewDisplay(surfaceView.getHolder().getSurface());
+        //mediaRecorder.setMaxDuration(15000); // Set max duration 15 sec.
+        //mediaRecorder.setMaxFileSize(10000000); // Set max file size 1M
 
         try {
             mediaRecorder.prepare();
@@ -469,14 +503,8 @@ public class MainActivity extends AppCompatActivity {
         Display display = getWindowManager().getDefaultDisplay();
         boolean widthIsMax = display.getWidth() > display.getHeight();
 
-        Camera.Parameters parameters = camera.getParameters();
-        // Check what resolutions are supported by your camera
-        List<Camera.Size> pictureSizes = parameters.getSupportedPictureSizes();
-        List<Camera.Size> videoSizes = parameters.getSupportedVideoSizes();
-
         // get camera preview size
         Camera.Size size = camera.getParameters().getPreviewSize();
-
 
         RectF rectDisplay = new RectF();
         RectF rectPreview = new RectF();
@@ -505,6 +533,8 @@ public class MainActivity extends AppCompatActivity {
 
         // set surface size
         surfaceView.setLayoutParams(new ConstraintLayout.LayoutParams((int)(rectPreview.right), (int)(rectPreview.bottom)));
+        focusImage.setX(rectPreview.right/2 - focusImage.getMeasuredWidth()/2);
+        focusImage.setY(rectPreview.bottom/2 - focusImage.getMeasuredHeight()/2);
     }
 
     void setCameraDisplayOrientation(int cameraId) {
@@ -517,9 +547,6 @@ public class MainActivity extends AppCompatActivity {
                 Camera.getCameraInfo(Camera.CameraInfo.CAMERA_FACING_FRONT, camInfo);
             int cameraRotationOffset = camInfo.orientation;
             Camera.Parameters parameters = camera.getParameters();
-
-            // Check what resolutions are supported by your camera
-            List<Camera.Size> sizes = parameters.getSupportedPictureSizes();
 
             int rotation = getWindowManager().getDefaultDisplay().getRotation();
             //int degrees = 0;
@@ -556,15 +583,9 @@ public class MainActivity extends AppCompatActivity {
             parameters.set("orientation", "portrait");
             parameters.setRotation(rotate);
             camera.setParameters(parameters);
-
-            Camera.Size pictureSize = camera.getParameters().getPictureSize();
-            Camera.Size videoSize = camera.getParameters().getPreviewSize();
-
-            photoButton.setText(pictureSize.width + "x" + pictureSize.height);
-            recordButton.setText(videoSize.width + "x" + videoSize.height);
-
-
-        } catch (Exception e) { }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
     }
 
     public boolean isChargerConnected(Context context) {
