@@ -70,6 +70,8 @@ public class MainActivity extends AppCompatActivity {
     private int camProfile;
     private int rotate;
     private File videoFile;
+    private int maxMemorySize;
+    private boolean deleteOldFiles;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -240,25 +242,22 @@ public class MainActivity extends AppCompatActivity {
         checkCameraHardware(this);
         recordTimer = 0;
         FULL_SCREEN = sp.getBoolean("screenKey", true);
-        useChargerConnection = sp.getBoolean("powerKey", true);
-        String videoQuality = sp.getString( "videoQuality", "High");
-        setCamcorderProfile(videoQuality);
+        useChargerConnection = sp.getBoolean("powerKey", false);
+        setCamcorderProfile(sp.getString( "videoQuality", "High"));
 
         String storage = sp.getString("storageKey", "");
         isExternalStorage = storage.equals("gallery") ? false : true;
 
         videoLengthSeconds = 60 * Integer.parseInt(sp.getString("length", "0"));
-        String camString = sp.getString("cameraKey", null);
-        if(camString != null){
-            if (Camera.getNumberOfCameras() > 1 && Integer.parseInt(camString) == 1) {
-                CAMERA_ID = 1;
-            }else{
-                CAMERA_ID = 0;
-            }
+        if(Integer.parseInt(sp.getString("cameraKey", "0")) == 1 && Camera.getNumberOfCameras() > 1){
+            CAMERA_ID = 1;
+        } else{
+            CAMERA_ID = 0;
         }
         camera = Camera.open(CAMERA_ID);
-        String camerePictureHight = sp.getString("photoSizeKey", "max");
-        setCameraResolutions(camerePictureHight);
+        setCameraResolutions(sp.getString("photoSizeKey", "max"));
+        maxMemorySize = Integer.parseInt(sp.getString("memorySizeKey", "0"));
+        deleteOldFiles = sp.getBoolean("deleteFeilseKey", true);
     }
 
     public void setCameraResolutions(String cameraPictureHeight){

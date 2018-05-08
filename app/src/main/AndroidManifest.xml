@@ -34,9 +34,10 @@
             android:name=".GalleryActivity"
             android:label="GALLERY"
             android:theme="@style/AppThemeSettings" />
-        <activity android:name=".AboutActivity"
+        <activity
+            android:name=".AboutActivity"
             android:label="ABOUT"
-            android:theme="@style/AppTheme"></activity>
+            android:theme="@style/AppTheme" />
     </application>
 
 </manifest>
