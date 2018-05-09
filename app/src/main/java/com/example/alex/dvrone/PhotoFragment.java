@@ -32,6 +32,8 @@ public class PhotoFragment extends Fragment {
     String path = (Environment.getExternalStorageDirectory() + "/DVROne/Photo");
     File[] files;
     String[] fileNames;
+    Context con;
+    private static File clickedfile;
     // TODO: Rename parameter arguments, choose names that match
     // the fragment initialization parameters, e.g. ARG_ITEM_NUMBER
     private static final String ARG_PARAM1 = "param1";
@@ -65,6 +67,11 @@ public class PhotoFragment extends Fragment {
         return fragment;
     }
 
+    public static File getClickedFile()
+    {
+        return clickedfile;
+    }
+
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -72,7 +79,7 @@ public class PhotoFragment extends Fragment {
             mParam1 = getArguments().getString(ARG_PARAM1);
             mParam2 = getArguments().getString(ARG_PARAM2);
         }
-
+con = getContext();
 
 
     }
@@ -100,6 +107,16 @@ public class PhotoFragment extends Fragment {
         gridview.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             public void onItemClick(AdapterView<?> parent, View v,
                                     int position, long id) {
+
+
+                Toast.makeText(con, "" + files[position].getAbsolutePath(),
+                        Toast.LENGTH_SHORT).show();
+                clickedfile = files[position];
+
+            Intent intent = new Intent(getActivity(),GalleryActivityImage.class);
+
+            startActivity(intent);
+
 
             }
         });

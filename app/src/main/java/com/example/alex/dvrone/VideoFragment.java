@@ -1,9 +1,11 @@
 package com.example.alex.dvrone;
 
 import android.content.Context;
+import android.content.Intent;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.Environment;
+import android.provider.MediaStore;
 import android.support.v4.app.Fragment;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -11,6 +13,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.GridView;
+import android.widget.Toast;
 
 import java.io.File;
 
@@ -27,6 +30,9 @@ public class VideoFragment extends Fragment {
 
     String path = (Environment.getExternalStorageDirectory() + "/DVROne/Video");
     File[] files;
+    String[] fileNames;
+    Context con;
+    private static File clickedfile;
     // TODO: Rename parameter arguments, choose names that match
     // the fragment initialization parameters, e.g. ARG_ITEM_NUMBER
     private static final String ARG_PARAM1 = "param1";
@@ -79,22 +85,32 @@ public class VideoFragment extends Fragment {
         Log.d("Files", "Path: " + path);
         File directory = new File(path);
         files = directory.listFiles();
+        fileNames = new String[files.length];
         Log.d("Files", "Size: "+ files.length);
         for (int i = 0; i < files.length; i++)
         {
-            Log.d("Files", "FileName:" + files[i].getName());
+            fileNames[i] = files[i].getName();
         }
 
         GridView gridview = (GridView) view.findViewById(R.id.gridview);
-        gridview.setAdapter(new ImageAdapter(this.getContext(),files));
+        gridview.setAdapter(new testImgAdapter(this.getContext(),files,fileNames));
 
         gridview.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             public void onItemClick(AdapterView<?> parent, View v,
                                     int position, long id) {
 
+
+                Toast.makeText(con, "" + files[position].getAbsolutePath(),
+                        Toast.LENGTH_SHORT).show();
+                clickedfile = files[position];
+
+                Intent intent = new Intent(getActivity(),GalleryActivityImage.class);
+
+                startActivity(intent);
+
+
             }
         });
-
         return inflater.inflate(R.layout.fragment_video, container, false);
     }
 

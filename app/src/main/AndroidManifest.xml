@@ -34,10 +34,12 @@
             android:name=".GalleryActivity"
             android:label="GALLERY"
             android:theme="@style/AppThemeSettings" />
-        <activity
-            android:name=".AboutActivity"
+        <activity android:name=".AboutActivity"
             android:label="ABOUT"
-            android:theme="@style/AppTheme" />
+            android:theme="@style/AppTheme"></activity>
+        <activity android:name=".GalleryActivityImage"
+            android:label="FULLSIZEIMAGE"
+            android:theme="@style/AppTheme"></activity>
     </application>
 
 </manifest>
