@@ -13,8 +13,6 @@ import android.view.MenuItem;
 public class GalleryActivity extends AppCompatActivity implements PhotoFragment.OnFragmentInteractionListener,
         VideoFragment.OnFragmentInteractionListener {
 
-    public Context share = this;
-
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -23,9 +21,6 @@ public class GalleryActivity extends AppCompatActivity implements PhotoFragment.
         setSupportActionBar(toolbar);
 
         TabLayout tabLayout = findViewById(R.id.tab_layout);
-        //tabLayout.addTab(tabLayout.newTab().setText("PHOTO"));
-        //tabLayout.addTab(tabLayout.newTab().setText("VIDEO"));
-        //tabLayout.setTabGravity(TabLayout.GRAVITY_FILL);
 
         final ViewPager viewPager = findViewById(R.id.pager);
         final PagerAdapter adapter = new PagerAdapter(getSupportFragmentManager(), tabLayout.getTabCount());
@@ -69,5 +64,10 @@ public class GalleryActivity extends AppCompatActivity implements PhotoFragment.
     @Override
     public void onFragmentInteraction(Uri uri) {
 
+    }
+
+    @Override
+    public void onResume(){
+        super.onResume();
     }
 }

@@ -116,8 +116,6 @@ con = getContext();
             Intent intent = new Intent(getActivity(),GalleryActivityImage.class);
 
             startActivity(intent);
-
-
             }
         });
         return view;
@@ -166,5 +164,10 @@ con = getContext();
     @Override
     public void onActivityResult(int requestCode, int resultCode, Intent data) {
 
+    }
+
+    @Override
+    public void onResume(){
+        super.onResume();
     }
 }
