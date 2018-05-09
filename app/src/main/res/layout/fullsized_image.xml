@@ -40,10 +40,11 @@
             android:layout_height="wrap_content"
             android:layout_margin="10dp"
             android:layout_weight="0.5"
-            android:textColor="#ffffff"
             android:background="@drawable/roundedbutton"
             android:drawableLeft="@android:drawable/ic_menu_info_details"
-            android:text="Info" />
+            android:onClick="onInfo"
+            android:text="Info"
+            android:textColor="#ffffff" />
     </LinearLayout>
 
 </android.support.constraint.ConstraintLayout>
