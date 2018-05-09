@@ -33,6 +33,8 @@ public class PhotoFragment extends Fragment {
     File[] files;
     String[] fileNames;
     Context con;
+    View view;
+
     private static File clickedfile;
     // TODO: Rename parameter arguments, choose names that match
     // the fragment initialization parameters, e.g. ARG_ITEM_NUMBER
@@ -89,35 +91,9 @@ con = getContext();
                              Bundle savedInstanceState) {
         // Inflate the layout for this fragment
 
-        View view = inflater.inflate(R.layout.fragment_photo, container, false);
-
-        Log.d("Files", "Path: " + path);
-        File directory = new File(path);
-        files = directory.listFiles();
-        fileNames = new String[files.length];
-        Log.d("Files", "Size: "+ files.length);
-        for (int i = 0; i < files.length; i++)
-        {
-            fileNames[i] = files[i].getName();
-        }
-
-        GridView gridview = (GridView) view.findViewById(R.id.gridview);
-        gridview.setAdapter(new ImageAdapter(this.getContext(),files,fileNames));
-
-        gridview.setOnItemClickListener(new AdapterView.OnItemClickListener() {
-            public void onItemClick(AdapterView<?> parent, View v,
-                                    int position, long id) {
+        view = inflater.inflate(R.layout.fragment_photo, container, false);
 
 
-                Toast.makeText(con, "" + files[position].getAbsolutePath(),
-                        Toast.LENGTH_SHORT).show();
-                clickedfile = files[position];
-
-            Intent intent = new Intent(getActivity(),GalleryActivityImage.class);
-
-            startActivity(intent);
-            }
-        });
         return view;
     }
 
@@ -168,6 +144,35 @@ con = getContext();
 
     @Override
     public void onResume(){
+
         super.onResume();
+
+        Log.d("Files", "Path: " + path);
+        File directory = new File(path);
+        files = directory.listFiles();
+        fileNames = new String[files.length];
+        Log.d("Files", "Size: "+ files.length);
+        for (int i = 0; i < files.length; i++)
+        {
+            fileNames[i] = files[i].getName();
+        }
+
+        GridView gridview = (GridView) view.findViewById(R.id.gridview);
+        gridview.setAdapter(new ImageAdapter(this.getContext(),files,fileNames));
+
+        gridview.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+            public void onItemClick(AdapterView<?> parent, View v,
+                                    int position, long id) {
+
+
+                Toast.makeText(con, "" + files[position].getAbsolutePath(),
+                        Toast.LENGTH_SHORT).show();
+                clickedfile = files[position];
+
+                Intent intent = new Intent(getActivity(),GalleryActivityImage.class);
+
+                startActivity(intent);
+            }
+        });
     }
 }

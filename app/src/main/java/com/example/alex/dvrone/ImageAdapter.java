@@ -25,11 +25,12 @@ public class ImageAdapter extends BaseAdapter {
 
     private LayoutInflater inflater;
 
-    public ImageAdapter(Context context,File icons[], String letters[]){
+    public ImageAdapter(Context context, File icons[], String letters[]) {
         this.context = context;
         this.letters = letters;
         this.icons = icons;
     }
+
     @Override
     public int getCount() {
         return letters.length;
@@ -52,24 +53,27 @@ public class ImageAdapter extends BaseAdapter {
         ImageView icon;
         TextView letter;
 
-        if(view == null)
-        {
+        if (view == null) {
             inflater = (LayoutInflater) context.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
 
             icon = new ImageView(context);
             letter = new TextView(context);
 
-            gridview = inflater.inflate(R.layout.custom_layout,null);
+            gridview = inflater.inflate(R.layout.custom_layout, null);
         }
 
 
         icon = (ImageView) gridview.findViewById(R.id.imageview);
         letter = (TextView) gridview.findViewById(R.id.imgText);
 
-        Bitmap ThumbImage = ThumbnailUtils.extractThumbnail(BitmapFactory.decodeFile(icons[i].getAbsolutePath()),300 ,300);
+        Bitmap ThumbImage = ThumbnailUtils.extractThumbnail(BitmapFactory.decodeFile(icons[i].getAbsolutePath()), 300, 300);
         icon.setImageBitmap(ThumbImage);
         letter.setText(letters[i]);
 
         return gridview;
     }
 }
+
+
+
+
