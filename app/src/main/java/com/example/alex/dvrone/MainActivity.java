@@ -52,6 +52,7 @@ public class MainActivity extends AppCompatActivity {
     private MediaRecorder mediaRecorder;
     private Button recordButton, photoButton;
     private ImageView focusImage;
+    private TextView storageTextView;
     private SurfaceHolder holder;
     private boolean isRecording;
     private Thread timeThread;
@@ -114,6 +115,7 @@ public class MainActivity extends AppCompatActivity {
         photoButton = findViewById(R.id.buttonPhoto);
         stopWatchText = findViewById(R.id.textViewStopWatch);
         focusImage = findViewById(R.id.imageViewFocus);
+        storageTextView = findViewById(R.id.textViewStorage);
         sp = PreferenceManager.getDefaultSharedPreferences(this);
         sw = new StopWatch();
         isRecording = false;
@@ -166,6 +168,7 @@ public class MainActivity extends AppCompatActivity {
                                 }
                                 String dateString = sdf.format(date);
                                 getSupportActionBar().setTitle(dateString);
+                                storageTextView.setText("Free: " + StorageManager.bytesToHuman(StorageManager.getFreeExternalMemory()));
                                 if(isRecording){
                                     if(videoLengthSeconds > 0){
                                         recordTimer++;
