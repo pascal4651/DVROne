@@ -4,6 +4,7 @@ import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.media.ThumbnailUtils;
+import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.BaseAdapter;
@@ -16,55 +17,59 @@ import java.io.File;
 public class ImageAdapter extends BaseAdapter {
 
 
+    private File icons[];
+
+    private String letters[];
+
     private Context context;
-    private Context mContext;
-    File[] mThumbIds;
 
+    private LayoutInflater inflater;
 
-    public ImageAdapter(Context c, File[] filer) {
-        mContext = c;
-        mThumbIds = filer;
+    public ImageAdapter(Context context,File icons[], String letters[]){
+        this.context = context;
+        this.letters = letters;
+        this.icons = icons;
     }
-
+    @Override
     public int getCount() {
-        return mThumbIds.length;
+        return letters.length;
     }
 
-    public Object getItem(int position) {
-        return null;
+    @Override
+    public Object getItem(int i) {
+        return letters[i];
     }
 
-    public long getItemId(int position) {
-        return 0;
+    @Override
+    public long getItemId(int i) {
+        return i;
     }
 
-    // create a new ImageView for each item referenced by the Adapter
-    public View getView(int position, View convertView, ViewGroup parent) {
-        ImageView imageView;
-        TextView textView;
-        if (convertView == null) {
-            // if it's not recycled, initialize some attributes
-            imageView = new ImageView(mContext);
-            textView = new TextView(mContext);
-            imageView.setLayoutParams(new GridView.LayoutParams(300, 300));
-            textView.setLayoutParams(new GridView.LayoutParams(300,300));
-            imageView.setScaleType(ImageView.ScaleType.CENTER_CROP);
-            imageView.setPadding(8, 8, 8, 8);
-        } else {
-            imageView = (ImageView) convertView;
-            textView = new TextView(mContext);
+    @Override
+    public View getView(int i, View view, ViewGroup viewGroup) {
+
+        View gridview = view;
+        ImageView icon;
+        TextView letter;
+
+        if(view == null)
+        {
+            inflater = (LayoutInflater) context.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
+
+            icon = new ImageView(context);
+            letter = new TextView(context);
+
+            gridview = inflater.inflate(R.layout.custom_layout,null);
         }
 
-        Bitmap ThumbImage = ThumbnailUtils.extractThumbnail(BitmapFactory.decodeFile(mThumbIds[position].getAbsolutePath()),300 ,300);
-        imageView.setImageBitmap(ThumbImage);
-        textView.setText(mThumbIds[position].getName());
-        return imageView;
+
+        icon = (ImageView) gridview.findViewById(R.id.imageview);
+        letter = (TextView) gridview.findViewById(R.id.imgText);
+
+        Bitmap ThumbImage = ThumbnailUtils.extractThumbnail(BitmapFactory.decodeFile(icons[i].getAbsolutePath()),300 ,300);
+        icon.setImageBitmap(ThumbImage);
+        letter.setText(letters[i]);
+
+        return gridview;
     }
 }
-
-// references to our images
-
-
-
-
-

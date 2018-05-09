@@ -102,7 +102,7 @@ con = getContext();
         }
 
         GridView gridview = (GridView) view.findViewById(R.id.gridview);
-        gridview.setAdapter(new testImgAdapter(this.getContext(),files,fileNames));
+        gridview.setAdapter(new ImageAdapter(this.getContext(),files,fileNames));
 
         gridview.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             public void onItemClick(AdapterView<?> parent, View v,
