@@ -8,6 +8,7 @@ import android.support.v7.app.AppCompatActivity;
 import android.text.Html;
 import android.view.MotionEvent;
 import android.view.View;
+import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 
@@ -16,7 +17,10 @@ import java.io.File;
 public class GalleryActivityImage extends AppCompatActivity implements View.OnTouchListener {
 
     private File file;
-    LinearLayout linearLayout;
+    private LinearLayout layout;
+    private ImageView imgv;
+    private Button buttonNext, buttonPrevious;
+    private float initialXPoint;
 
     @Override
     protected void onCreate(Bundle savedInstanceState)
@@ -25,13 +29,15 @@ public class GalleryActivityImage extends AppCompatActivity implements View.OnTo
         setContentView(R.layout.fullsized_image);
 
         this.file = PhotoFragment.getClickedFile();
+        buttonNext = findViewById(R.id.buttonRight);
+        buttonPrevious = findViewById(R.id.buttonLeft);
 
-        ImageView imgv = findViewById(R.id.imageView2);
+        imgv = findViewById(R.id.imageView2);
         imgv.setLayerType(View.LAYER_TYPE_SOFTWARE, null);
         imgv.setImageBitmap(BitmapFactory.decodeFile(file.getAbsolutePath()));
 
-        linearLayout = findViewById(R.id.linearLayout);
-        linearLayout.setVisibility(View.GONE);
+        layout = findViewById(R.id.baseLayout);
+        layout.setVisibility(View.GONE);
 
         findViewById(R.id.constraintLayout).setOnTouchListener(this);
 
@@ -42,15 +48,25 @@ public class GalleryActivityImage extends AppCompatActivity implements View.OnTo
     public boolean onTouch(View view, MotionEvent motionEvent) {
         switch (motionEvent.getAction()) {
             case MotionEvent.ACTION_DOWN:
-                linearLayout.setVisibility(View.VISIBLE);
-                linearLayout.postDelayed(new Runnable() {
-                    public void run() {
-                        linearLayout.setVisibility(View.GONE);
-                    }
-                }, 5000);
+                initialXPoint = motionEvent.getX();
+                break;
+            case MotionEvent.ACTION_UP:
+                float deltaX = initialXPoint - motionEvent.getX();
+                if (deltaX > 200) {
+                    buttonNext.performClick();
+                } else if(deltaX < -200){
+                    buttonPrevious.performClick();
+                } else{
+                    layout.setVisibility(View.VISIBLE);
+                    layout.postDelayed(new Runnable() {
+                        public void run() {
+                            layout.setVisibility(View.GONE);
+                        }
+                    }, 3000);
+                }
                 break;
         }
-        return false;
+        return true;
     }
 
     public void onDelete(View view){
@@ -79,8 +95,8 @@ public class GalleryActivityImage extends AppCompatActivity implements View.OnTo
         builder.setTitle("Details")
                 .setIcon(android.R.drawable.ic_menu_info_details)
                 .setMessage(Html.fromHtml("<b>FULL PATH: </b>" + "<small><i>" +  file.getAbsolutePath() + "</i></small>"
-                + "<br><br><b>TYPE: </b><i>photo</i><br><br><b>SIZE: </b><i>" + StorageManager.bytesToHuman(file.length()) + "</i>"
-                + "<br><br><b>RESOLUTION: </b><i>" + getResolutionToString(file) + "</i>"))
+                        + "<br><br><b>TYPE: </b><i>photo</i><br><br><b>SIZE: </b><i>" + StorageManager.bytesToHuman(file.length()) + "</i>"
+                        + "<br><br><b>RESOLUTION: </b><i>" + getResolutionToString(file) + "</i>"))
                 .setPositiveButton("Close", null).create();
         builder.show();
     }
@@ -90,6 +106,18 @@ public class GalleryActivityImage extends AppCompatActivity implements View.OnTo
         bitMapOption.inJustDecodeBounds = true;
         BitmapFactory.decodeFile(imagePath.getAbsolutePath(), bitMapOption);
         return bitMapOption.outWidth + "x" + bitMapOption.outHeight;
+    }
+
+    public void onNextImage(View view){
+        file = PhotoFragment.getNextFile();
+        imgv.setImageBitmap(BitmapFactory.decodeFile(file.getAbsolutePath()));
+        setTitle(file.getName());
+    }
+
+    public void onPreviousImage(View view){
+        file = PhotoFragment.getNextFile();
+        imgv.setImageBitmap(BitmapFactory.decodeFile(file.getAbsolutePath()));
+        setTitle(file.getName());
     }
 }
 

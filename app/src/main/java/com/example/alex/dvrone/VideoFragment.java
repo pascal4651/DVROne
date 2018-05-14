@@ -2,14 +2,9 @@ package com.example.alex.dvrone;
 
 import android.content.Context;
 import android.content.Intent;
-import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
-import android.media.MediaMetadataRetriever;
-import android.media.ThumbnailUtils;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.Environment;
-import android.provider.MediaStore;
 import android.support.v4.app.Fragment;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -19,10 +14,7 @@ import android.widget.AdapterView;
 import android.widget.GridView;
 import android.widget.Toast;
 
-import java.io.ByteArrayOutputStream;
 import java.io.File;
-import java.io.FileOutputStream;
-import java.io.OutputStream;
 
 
 /**
@@ -36,10 +28,12 @@ import java.io.OutputStream;
 public class VideoFragment extends Fragment {
 
     String path = (Environment.getExternalStorageDirectory() + "/DVROne/Video");
-    File[] files;
+    private static File[] files;
     String[] fileNames;
     Context con;
-    private static File clickedfile;
+    View view;
+    private static int currentIndex;
+
     // TODO: Rename parameter arguments, choose names that match
     // the fragment initialization parameters, e.g. ARG_ITEM_NUMBER
     private static final String ARG_PARAM1 = "param1";
@@ -80,10 +74,7 @@ public class VideoFragment extends Fragment {
             mParam1 = getArguments().getString(ARG_PARAM1);
             mParam2 = getArguments().getString(ARG_PARAM2);
         }
-    }
-
-    public Bitmap createVideoThumbNail(String path){
-        return ThumbnailUtils.createVideoThumbnail(path,MediaStore.Video.Thumbnails.MICRO_KIND);
+        con = getContext();
     }
 
     @Override
@@ -91,38 +82,8 @@ public class VideoFragment extends Fragment {
                              Bundle savedInstanceState) {
         // Inflate the layout for this fragment
 
-        View view = inflater.inflate(R.layout.fragment_photo, container, false);
-
-        Log.d("Files", "Path: " + path);
-        File directory = new File(path);
-        files = directory.listFiles();
-        fileNames = new String[files.length];
-        Log.d("Files", "Size: "+ files.length);
-        for (int i = 0; i < files.length; i++)
-        {
-            fileNames[i] = files[i].getName();
-        }
-
-        GridView gridview = (GridView) view.findViewById(R.id.gridview);
-        gridview.setAdapter(new ImageAdapter(this.getContext(),files,fileNames));
-
-        gridview.setOnItemClickListener(new AdapterView.OnItemClickListener() {
-            public void onItemClick(AdapterView<?> parent, View v,
-                                    int position, long id) {
-
-
-                Toast.makeText(con, "" + files[position].getAbsolutePath(),
-                        Toast.LENGTH_SHORT).show();
-                clickedfile = files[position];
-
-                Intent intent = new Intent(getActivity(),GalleryActivityImage.class);
-
-                startActivity(intent);
-
-
-            }
-        });
-        return inflater.inflate(R.layout.fragment_video, container, false);
+        view = inflater.inflate(R.layout.fragment_video, container, false);
+        return view;
     }
 
     // TODO: Rename method, update argument and hook method into UI event
@@ -162,5 +123,52 @@ public class VideoFragment extends Fragment {
     public interface OnFragmentInteractionListener {
         // TODO: Update argument type and name
         void onFragmentInteraction(Uri uri);
+    }
+
+    public static File getClickedFile() {
+        return files[currentIndex];
+    }
+
+    public static File getNextFile(){
+        if(++currentIndex == files.length){
+            currentIndex = 0;
+        }
+        return files[currentIndex];
+    }
+
+    public static File getPreviousFile(){
+        if(--currentIndex < 0){
+            currentIndex = files.length - 1;
+        }
+        return files[currentIndex];
+    }
+
+    @Override
+    public void onResume(){
+        super.onResume();
+
+        Log.d("Files", "Path: " + path);
+        File directory = new File(path);
+        files = directory.listFiles();
+        fileNames = new String[files.length];
+        Log.d("Files", "Size: "+ files.length);
+        for (int i = 0; i < files.length; i++)
+        {
+            fileNames[i] = files[i].getName();
+        }
+        GridView gridview = (GridView) view.findViewById(R.id.gridview);
+        gridview.setAdapter(new VideoAdapter(this.getContext(),files,fileNames));
+
+        gridview.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+            public void onItemClick(AdapterView<?> parent, View v,
+                                    int position, long id) {
+
+                Toast.makeText(con, "" + files[position].getAbsolutePath(), Toast.LENGTH_SHORT).show();
+                currentIndex = position;
+
+                Intent intent = new Intent(getActivity(),GalleryActivityVideo.class);
+                startActivity(intent);
+            }
+        });
     }
 }

@@ -30,10 +30,11 @@ import java.io.File;
 public class PhotoFragment extends Fragment {
 
     String path = (Environment.getExternalStorageDirectory() + "/DVROne/Photo");
-    File[] files;
+    private static File[] files;
     String[] fileNames;
     Context con;
     View view;
+    private static int currentIndex;
 
     private static File clickedfile;
     // TODO: Rename parameter arguments, choose names that match
@@ -69,11 +70,6 @@ public class PhotoFragment extends Fragment {
         return fragment;
     }
 
-    public static File getClickedFile()
-    {
-        return clickedfile;
-    }
-
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -81,19 +77,13 @@ public class PhotoFragment extends Fragment {
             mParam1 = getArguments().getString(ARG_PARAM1);
             mParam2 = getArguments().getString(ARG_PARAM2);
         }
-con = getContext();
-
-
+        con = getContext();
     }
 
     @Override
-    public View onCreateView(LayoutInflater inflater, ViewGroup container,
-                             Bundle savedInstanceState) {
+    public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         // Inflate the layout for this fragment
-
         view = inflater.inflate(R.layout.fragment_photo, container, false);
-
-
         return view;
     }
 
@@ -167,12 +157,28 @@ con = getContext();
 
                 Toast.makeText(con, "" + files[position].getAbsolutePath(),
                         Toast.LENGTH_SHORT).show();
-                clickedfile = files[position];
+                currentIndex = position;
 
                 Intent intent = new Intent(getActivity(),GalleryActivityImage.class);
-
                 startActivity(intent);
             }
         });
+    }
+    public static File getClickedFile() {
+        return files[currentIndex];
+    }
+
+    public static File getNextFile(){
+        if(++currentIndex == files.length){
+            currentIndex = 0;
+        }
+        return files[currentIndex];
+    }
+
+    public static File getPreviousFile(){
+        if(--currentIndex < 0){
+            currentIndex = files.length - 1;
+        }
+        return files[currentIndex];
     }
 }

@@ -15,36 +15,88 @@
         app:srcCompat="@mipmap/ic_launcher" />
 
     <LinearLayout
-        android:id="@+id/linearLayout"
+        android:id="@+id/baseLayout"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:orientation="horizontal"
-        android:visibility="visible"
-        app:layout_constraintBottom_toBottomOf="parent">
+        android:layout_height="match_parent"
+        android:orientation="vertical">
 
-        <Button
-            android:id="@+id/buttonDelete"
-            android:layout_width="0dp"
+        <LinearLayout
+            android:id="@+id/linearLayout"
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_margin="10dp"
-            android:layout_weight="0.5"
-            android:background="@drawable/roundedbutton"
-            android:drawableLeft="@android:drawable/ic_menu_delete"
-            android:onClick="onDelete"
-            android:text="Delete"
-            android:textColor="#ffffff" />
+            android:orientation="horizontal"
+            android:visibility="visible">
 
-        <Button
-            android:id="@+id/buttonInfo"
-            android:layout_width="0dp"
+            <Button
+                android:id="@+id/buttonDelete"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_margin="10dp"
+                android:layout_weight="0.5"
+                android:background="@drawable/roundedbutton"
+                android:drawableLeft="@android:drawable/ic_menu_delete"
+                android:onClick="onDelete"
+                android:text="Delete"
+                android:textColor="#ffffff" />
+
+            <Button
+                android:id="@+id/buttonInfo"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_margin="10dp"
+                android:layout_weight="0.5"
+                android:background="@drawable/roundedbutton"
+                android:drawableLeft="@android:drawable/ic_menu_info_details"
+                android:onClick="onInfo"
+                android:text="Info"
+                android:textColor="#ffffff" />
+
+
+        </LinearLayout>
+
+        <LinearLayout
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_margin="10dp"
-            android:layout_weight="0.5"
-            android:background="@drawable/roundedbutton"
-            android:drawableLeft="@android:drawable/ic_menu_info_details"
-            android:onClick="onInfo"
-            android:text="Info"
-            android:textColor="#ffffff" />
+            android:layout_weight="1"
+            android:orientation="horizontal"></LinearLayout>
+
+
+        <LinearLayout
+            android:id="@+id/linearLayout2"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:visibility="visible"
+            app:layout_constraintBottom_toBottomOf="parent">
+
+            <Button
+                android:id="@+id/buttonLeft"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_margin="10dp"
+                android:background="@drawable/roundedbutton"
+                android:drawableLeft="@android:drawable/ic_media_previous"
+                android:onClick="onPreviousImage"
+                android:textColor="#ffffff" />
+
+
+            <TextView
+                android:id="@+id/textView"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:text="TextView" />
+
+            <Button
+                android:id="@+id/buttonRight"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_margin="10dp"
+                android:background="@drawable/roundedbutton"
+                android:drawableRight="@android:drawable/ic_media_next"
+                android:onClick="onNextImage"
+                android:textColor="#ffffff" />
+        </LinearLayout>
     </LinearLayout>
 
 </android.support.constraint.ConstraintLayout>
