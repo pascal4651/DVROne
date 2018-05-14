@@ -115,7 +115,7 @@ public class GalleryActivityImage extends AppCompatActivity implements View.OnTo
     }
 
     public void onPreviousImage(View view){
-        file = PhotoFragment.getNextFile();
+        file = PhotoFragment.getPreviousFile();
         imgv.setImageBitmap(BitmapFactory.decodeFile(file.getAbsolutePath()));
         setTitle(file.getName());
     }
