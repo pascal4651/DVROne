@@ -3,6 +3,7 @@ package com.example.alex.dvrone;
 import android.content.Context;
 import android.content.Intent;
 import android.net.Uri;
+import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.Environment;
 import android.support.v4.app.Fragment;
@@ -143,32 +144,37 @@ public class VideoFragment extends Fragment {
         return files[currentIndex];
     }
 
+
     @Override
     public void onResume(){
         super.onResume();
 
+
+
         Log.d("Files", "Path: " + path);
         File directory = new File(path);
+
         files = directory.listFiles();
-        fileNames = new String[files.length];
-        Log.d("Files", "Size: "+ files.length);
-        for (int i = 0; i < files.length; i++)
-        {
-            fileNames[i] = files[i].getName();
-        }
-        GridView gridview = (GridView) view.findViewById(R.id.gridview);
-        gridview.setAdapter(new VideoAdapter(this.getContext(),files,fileNames));
-
-        gridview.setOnItemClickListener(new AdapterView.OnItemClickListener() {
-            public void onItemClick(AdapterView<?> parent, View v,
-                                    int position, long id) {
-
-                Toast.makeText(con, "" + files[position].getAbsolutePath(), Toast.LENGTH_SHORT).show();
-                currentIndex = position;
-
-                Intent intent = new Intent(getActivity(),GalleryActivityVideo.class);
-                startActivity(intent);
+        if(files != null) {
+            fileNames = new String[files.length];
+            Log.d("Files", "Size: " + files.length);
+            for (int i = 0; i < files.length; i++) {
+                fileNames[i] = files[i].getName();
             }
-        });
+            GridView gridview = (GridView) view.findViewById(R.id.gridview);
+            gridview.setAdapter(new VideoAdapter(this.getContext(), files, fileNames));
+
+            gridview.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+                public void onItemClick(AdapterView<?> parent, View v,
+                                        int position, long id) {
+
+                    Toast.makeText(con, "" + files[position].getAbsolutePath(), Toast.LENGTH_SHORT).show();
+                    currentIndex = position;
+
+                    Intent intent = new Intent(getActivity(), GalleryActivityVideo.class);
+                    startActivity(intent);
+                }
+            });
+        }
     }
 }
