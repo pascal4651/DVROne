@@ -35,7 +35,6 @@ public class VideoFragment extends Fragment {
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         // Inflate the layout for this fragment
-
         view = inflater.inflate(R.layout.fragment_video, container, false);
         return view;
     }
@@ -77,7 +76,7 @@ public class VideoFragment extends Fragment {
             for (int i = 0; i < files.length; i++) {
                 fileNames[i] = files[i].getName();
             }
-            final GridView gridview = (GridView) view.findViewById(R.id.gridview);
+            final GridView gridview = view.findViewById(R.id.gridview);
             gridview.setAdapter(new ImageAdapter(this.getContext(), files, fileNames));
 
             gridview.setOnItemClickListener(new AdapterView.OnItemClickListener() {
@@ -107,10 +106,23 @@ public class VideoFragment extends Fragment {
                     isSelection = !isSelection;
                     if(isSelection){
                         controlsLayout.setVisibility(View.VISIBLE);
-                    } else {
-                        controlsLayout.setVisibility(View.GONE);
                         v.setBackgroundColor(Color.BLUE);
                         filesForDelete[i] = files[i];
+                    } else {
+                        controlsLayout.setVisibility(View.GONE);
+                        for(int j = 0; j < filesForDelete.length; j++){
+                            filesForDelete[i] = null;
+                        }
+                        for(int index=0; index<((ViewGroup)view).getChildCount(); ++index) {
+                            View nextChild = ((ViewGroup)view).getChildAt(index);
+                            if(nextChild instanceof GridView)
+                            {
+                                for(int index2=0; index2<((ViewGroup)nextChild).getChildCount(); ++index2) {
+                                    View nextChild2 = ((ViewGroup) nextChild).getChildAt(index2);
+                                    nextChild2.setBackgroundColor(Color.WHITE);
+                                }
+                            }
+                        }
                     }
                     return true;
                 }
