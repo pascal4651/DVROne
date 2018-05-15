@@ -6,8 +6,8 @@
         android:id="@+id/imageview"
         android:layout_width="300px"
         android:layout_height="300px"
-        android:layout_marginLeft="8dp"
-        android:layout_marginRight="8dp"
+        android:layout_margin="5dp"
+        android:layout_centerHorizontal="true"
         android:src="@android:drawable/ic_menu_gallery" />
     <TextView
         android:layout_width="wrap_content"
@@ -15,7 +15,6 @@
         android:text="new text"
         android:id="@+id/imgText"
         android:layout_below="@+id/imageview"
-        android:layout_marginTop="5dp"
         android:textSize="9dp"
         />
 

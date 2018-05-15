@@ -29,19 +29,19 @@
         android:visibility="invisible">
 
         <Button
-            android:id="@+id/buttonAll"
+            android:id="@+id/buttonAllVideos"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_margin="10dp"
             android:layout_weight="0.33"
             android:background="@drawable/roundedbutton"
             android:drawableLeft="@android:drawable/ic_menu_delete"
-            android:text="Delete All"
+            android:text="Select All"
             android:textColor="#ffffff"
             android:textSize="10dp" />
 
         <Button
-            android:id="@+id/buttonDelete"
+            android:id="@+id/buttonDeleteVideos"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_margin="10dp"
@@ -53,7 +53,7 @@
             android:textSize="10dp" />
 
         <Button
-            android:id="@+id/buttonRight"
+            android:id="@+id/buttonCancelVideos"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_margin="10dp"
