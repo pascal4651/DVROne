@@ -25,6 +25,7 @@ public class VideoFragment extends Fragment {
     private static int currentIndex;
     private boolean isSelection;
     private LinearLayout controlsLayout;
+    private File[] filesForDelete;
 
     public VideoFragment() {
         // Required empty public constructor
@@ -68,6 +69,7 @@ public class VideoFragment extends Fragment {
         File directory = new File(path);
 
         files = directory.listFiles();
+        filesForDelete = new File[files.length];
 
         if(files != null) {
             fileNames = new String[files.length];
@@ -79,13 +81,19 @@ public class VideoFragment extends Fragment {
             gridview.setAdapter(new ImageAdapter(this.getContext(), files, fileNames));
 
             gridview.setOnItemClickListener(new AdapterView.OnItemClickListener() {
-                public void onItemClick(AdapterView<?> parent, View v,
-                                        int position, long id) {
+                public void onItemClick(AdapterView<?> parent, View v, int i, long id) {
                     if(isSelection){
-                        v.setBackgroundColor(Color.BLUE);
+                        if(filesForDelete[i] == null){
+                            filesForDelete[i] = files[i];
+                            v.setBackgroundColor(Color.BLUE);
+                        } else {
+                            filesForDelete[i] = null;
+                            v.setBackgroundColor(Color.WHITE);
+                            checkFilesForDelete();
+                        }
                     } else{
-                        Toast.makeText(getContext(), "" + files[position].getAbsolutePath(), Toast.LENGTH_SHORT).show();
-                        currentIndex = position;
+                        Toast.makeText(getContext(), "" + files[i].getAbsolutePath(), Toast.LENGTH_SHORT).show();
+                        currentIndex = i;
 
                         Intent intent = new Intent(getActivity(), GalleryActivityVideo.class);
                         startActivity(intent);
@@ -95,40 +103,31 @@ public class VideoFragment extends Fragment {
 
             gridview.setOnItemLongClickListener(new AdapterView.OnItemLongClickListener() {
                 @Override
-                public boolean onItemLongClick(AdapterView<?> av, View v, int pos, long id) {
+                public boolean onItemLongClick(AdapterView<?> av, View v, int i, long id) {
                     isSelection = !isSelection;
                     if(isSelection){
                         controlsLayout.setVisibility(View.VISIBLE);
                     } else {
                         controlsLayout.setVisibility(View.GONE);
+                        v.setBackgroundColor(Color.BLUE);
+                        filesForDelete[i] = files[i];
                     }
-                    v.setBackgroundColor(Color.BLUE);
-                    /*
-                    try {
-                        if (nPrevSelGridItem != -1) {
-                            viewPrev = gridview.getChildAt(nPrevSelGridItem);
-                            viewPrev.setBackgroundColor(Color.BLUE);
-                        }
-                        nPrevSelGridItem = pos;
-                        if (nPrevSelGridItem == pos) {
-                            // was her before
-                            //View viewPrev = (View) gridview.getChildAt(nPrevSelGridItem);
-
-                            //view.setBackgroundColor(getResources().getColor(R.color.colorPrimary));
-                        }
-                    } catch (Exception e) {
-                        e.printStackTrace();
-                    }*/
-                    //return onLongGridItemClick(v,pos,id);
                     return true;
                 }
             });
         }
     }
 
-    protected boolean onLongGridItemClick(View v, int pos, long id) {
-
-        //Log.i(TAG, "onLongGridItemClick id=" + id);
-        return true;
+    public void checkFilesForDelete(){
+        isSelection = false;
+        for(File f : filesForDelete){
+            if(f != null){
+                isSelection = true;
+                break;
+            }
+        }
+        if(!isSelection){
+            controlsLayout.setVisibility(View.INVISIBLE);
+        }
     }
 }
