@@ -510,7 +510,6 @@ public class MainActivity extends AppCompatActivity {
         } else {
             return null;
         }
-
         // initiate media scan and put the new things into the path array to
         // make the scanner aware of the location and the files you want to see
         MediaScannerConnection.scanFile(this, new String[] {mediaFile.getPath()}, null, null);
@@ -588,8 +587,7 @@ public class MainActivity extends AppCompatActivity {
             if (camInfo.facing == Camera.CameraInfo.CAMERA_FACING_FRONT) {
                 displayRotation = (cameraRotationOffset + degrees) % 360;
                 displayRotation = (360 - displayRotation) % 360; // compensate
-                // the
-                // mirror
+                // the mirror
             } else { // back-facing
                 displayRotation = (cameraRotationOffset - degrees + 360) % 360;
             }

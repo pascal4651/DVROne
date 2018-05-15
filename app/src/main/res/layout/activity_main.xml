@@ -18,7 +18,7 @@
         android:id="@+id/imageViewFocus"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        app:srcCompat="@drawable/camcenter" />
+        app:srcCompat="@drawable/crossh" />
 
     <LinearLayout
         android:layout_width="wrap_content"

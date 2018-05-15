@@ -72,7 +72,7 @@ public class VideoFragment extends Fragment {
                 fileNames[i] = files[i].getName();
             }
             GridView gridview = (GridView) view.findViewById(R.id.gridview);
-            gridview.setAdapter(new VideoAdapter(this.getContext(), files, fileNames));
+            gridview.setAdapter(new ImageAdapter(this.getContext(), files, fileNames));
 
             gridview.setOnItemClickListener(new AdapterView.OnItemClickListener() {
                 public void onItemClick(AdapterView<?> parent, View v,

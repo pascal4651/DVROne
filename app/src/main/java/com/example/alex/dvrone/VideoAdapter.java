@@ -56,8 +56,15 @@ public class VideoAdapter extends BaseAdapter {
         icon = gridview.findViewById(R.id.imageview);
         letter = gridview.findViewById(R.id.imgText);
 
-        Bitmap ThumbImage = ThumbnailUtils.createVideoThumbnail(icons[i].getAbsolutePath(), MediaStore.Video.Thumbnails.MINI_KIND);
-        icon.setImageBitmap(Bitmap.createScaledBitmap(ThumbImage, 300, 300, false));
+        if(icon.getTag() != null) {
+            ((ImageGetter) icon.getTag()).cancel(true);
+        }
+        ImageGetter task = new ImageGetter(icon) ;
+        task.execute(icons[i]);
+        icon.setTag(task);
+
+        //Bitmap ThumbImage = ThumbnailUtils.createVideoThumbnail(icons[i].getAbsolutePath(), MediaStore.Video.Thumbnails.MINI_KIND);
+        //icon.setImageBitmap(Bitmap.createScaledBitmap(ThumbImage, 300, 300, false));
         letter.setText(letters[i]);
         return gridview;
     }

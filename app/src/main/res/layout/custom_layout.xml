@@ -4,11 +4,11 @@
 
     <ImageView
         android:id="@+id/imageview"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
+        android:layout_width="300px"
+        android:layout_height="300px"
         android:layout_marginLeft="8dp"
         android:layout_marginRight="8dp"
-        android:src="@mipmap/ic_launcher" />
+        android:src="@android:drawable/ic_menu_gallery" />
     <TextView
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"

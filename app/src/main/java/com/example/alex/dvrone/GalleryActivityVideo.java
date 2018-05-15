@@ -69,6 +69,7 @@ public class GalleryActivityVideo extends AppCompatActivity implements View.OnTo
                     });
                 }
                 catch(InterruptedException e){
+                    e.printStackTrace();
                 }
             }
         }.start();

@@ -103,8 +103,15 @@ public class ImageAdapter extends BaseAdapter {
         icon = (ImageView) gridview.findViewById(R.id.imageview);
         letter = (TextView) gridview.findViewById(R.id.imgText);
 
-        Bitmap ThumbImage = decodeImage(icons[i]);
-        icon.setImageBitmap(ThumbImage);
+        if(icon.getTag() != null) {
+            ((ImageGetter) icon.getTag()).cancel(true);
+        }
+        ImageGetter task = new ImageGetter(icon) ;
+        task.execute(icons[i]);
+        icon.setTag(task);
+
+        //Bitmap ThumbImage = decodeImage(icons[i]);
+        //icon.setImageBitmap(ThumbImage);
         letter.setText(letters[i]);
 
         return gridview;
