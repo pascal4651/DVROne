@@ -33,6 +33,7 @@ public class PhotoFragment extends Fragment implements View.OnClickListener {
     private LinearLayout controlsLayout;
     private boolean isSelection;
     private Button buttonSelect, buttonDelete, buttonCancel;
+    private File selectedFile;
 
     public PhotoFragment() {
         // Required empty public constructor
@@ -95,7 +96,8 @@ public class PhotoFragment extends Fragment implements View.OnClickListener {
                         checkFilesForDelete();
                     }
                 } else {
-                    Intent intent = new Intent(getActivity(), GalleryActivityVideo.class);
+                    currentIndex = i;
+                    Intent intent = new Intent(getActivity(), GalleryActivityImage.class);
                     startActivity(intent);
                 }
             }

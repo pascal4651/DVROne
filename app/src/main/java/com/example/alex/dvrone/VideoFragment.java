@@ -100,6 +100,7 @@ public class VideoFragment extends Fragment implements View.OnClickListener {
                             checkFilesForDelete();
                         }
                     } else {
+                        currentIndex = i;
                         Intent intent = new Intent(getActivity(), GalleryActivityVideo.class);
                         startActivity(intent);
                     }
