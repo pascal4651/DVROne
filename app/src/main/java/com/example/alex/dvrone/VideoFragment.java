@@ -100,9 +100,6 @@ public class VideoFragment extends Fragment implements View.OnClickListener {
                             checkFilesForDelete();
                         }
                     } else {
-                        Toast.makeText(getContext(), "" + files[i].getAbsolutePath(), Toast.LENGTH_SHORT).show();
-                        currentIndex = i;
-
                         Intent intent = new Intent(getActivity(), GalleryActivityVideo.class);
                         startActivity(intent);
                     }
