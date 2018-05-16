@@ -1,10 +1,12 @@
 package com.example.alex.dvrone;
 
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.graphics.Color;
 import android.os.Bundle;
 import android.os.Environment;
 import android.support.v4.app.Fragment;
+import android.support.v7.app.AlertDialog;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -155,15 +157,27 @@ public class VideoFragment extends Fragment implements View.OnClickListener {
                 }
                 break;
             case R.id.buttonDeleteVideos:
-                for(int i = 0; i < filesForDelete.length; i++)
-                {
-                    if(filesForDelete[i] != null)
-                    {
-                        filesForDelete[i] = null;
-                        files[i].delete();
-                    }
-                }
-                getActivity().recreate();
+                AlertDialog.Builder builder = new AlertDialog.Builder(getContext());
+                builder.setTitle("Confirm delete")
+                        .setIcon(android.R.drawable.ic_menu_delete)
+                        .setMessage("Are you sure you want to delete this file(s) ?")
+                        .setPositiveButton("OK",
+                                new DialogInterface.OnClickListener() {
+                                    @Override
+                                    public void onClick(DialogInterface dialog, int which) {
+                                        for(int i = 0; i < filesForDelete.length; i++)
+                                        {
+                                            if(filesForDelete[i] != null)
+                                            {
+                                                filesForDelete[i] = null;
+                                                files[i].delete();
+                                            }
+                                        }
+                                        getActivity().recreate();
+                                    }
+                                })
+                        .setNegativeButton("Cancel", null).create();
+                builder.show();
                 break;
             case R.id.buttonCancelVideos:
                 controlsLayout.setVisibility(View.GONE);
