@@ -339,80 +339,95 @@ public class MainActivity extends AppCompatActivity {
     }
 
     public void onClickPicture(View view) {
-        if(isRecording){
-            recordButton.performClick();
-        }
-        try{
-            final File photoFile = getOutputMediaFile(1);
-            camera.takePicture(null, null, new Camera.PictureCallback() {
-                @Override
-                public void onPictureTaken(byte[] data, Camera camera) {
-                    try {
-                        FileOutputStream fos = new FileOutputStream(photoFile);
-                        fos.write(data);
-                        fos.close();
-                    } catch (Exception e) {
-                        e.printStackTrace();
+        if(isExternalStorageWritable()) {
+            if (isRecording) {
+                recordButton.performClick();
+            }
+            try {
+                final File photoFile = getOutputMediaFile(1);
+                camera.takePicture(null, null, new Camera.PictureCallback() {
+                    @Override
+                    public void onPictureTaken(byte[] data, Camera camera) {
+                        try {
+                            FileOutputStream fos = new FileOutputStream(photoFile);
+                            fos.write(data);
+                            fos.close();
+                        } catch (Exception e) {
+                            e.printStackTrace();
+                        }
                     }
-                }
-            });
-            Toast toast = Toast.makeText(this, photoFile.toString(), Toast.LENGTH_SHORT);
+                });
+                Toast toast = Toast.makeText(this, photoFile.toString(), Toast.LENGTH_SHORT);
+                toast.setGravity(Gravity.CENTER, 0, 0);
+                toast.show();
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+            camera.startPreview();
+        }
+        else
+        {
+            Toast toast = Toast.makeText(this, "You do not have enough space left on the phone!", Toast.LENGTH_SHORT);
             toast.setGravity(Gravity.CENTER, 0, 0);
             toast.show();
-        }catch (Exception e){
-            e.printStackTrace();
         }
-        camera.startPreview();
     }
 
     public void onClickRecord(View view){
-        if(isRecording){
-            if (mediaRecorder != null) {
-                try{
-                    mediaRecorder.stop();
-                } catch (Exception e){
-                    videoFile.delete();
-                    e.printStackTrace();
-                } finally {
+        if(isExternalStorageWritable()) {
+            if (isRecording) {
+                if (mediaRecorder != null) {
+                    try {
+                        mediaRecorder.stop();
+                    } catch (Exception e) {
+                        videoFile.delete();
+                        e.printStackTrace();
+                    } finally {
+                        releaseMediaRecorder();
+                        mediaRecorder = null;
+                    }
+                }
+                sw.stop();
+                recordTimer = 0;
+                stopWatchText.setVisibility(View.INVISIBLE);
+                isRecording = false;
+                recordButton.setCompoundDrawablesWithIntrinsicBounds(null, getResources().getDrawable(R.drawable.rec), null, null);
+                Toast toast = Toast.makeText(this, "PAUSED", Toast.LENGTH_SHORT);
+                toast.setGravity(Gravity.CENTER, 0, 0);
+                toast.show();
+                getWindow().clearFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
+            } else {
+                if (useChargerConnection) {
+                    if (!isChargerConnected(this)) {
+                        Toast toast = Toast.makeText(this, "Charger is disconnected", Toast.LENGTH_SHORT);
+                        toast.setGravity(Gravity.CENTER, 0, 0);
+                        toast.show();
+                        return;
+                    }
+                }
+                if (prepareVideoRecorder()) {
+                    mediaRecorder.start();
+                    isRecording = true;
+                    sw.start();
+                    stopWatchText.setVisibility(View.VISIBLE);
+                    recordButton.setCompoundDrawablesWithIntrinsicBounds(null, getResources().getDrawable(R.drawable.paus), null, null);
+                    getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
+                } else {
                     releaseMediaRecorder();
-                    mediaRecorder = null;
                 }
             }
-            sw.stop();
-            recordTimer = 0;
-            stopWatchText.setVisibility(View.INVISIBLE);
-            isRecording = false;
-            recordButton.setCompoundDrawablesWithIntrinsicBounds(null, getResources().getDrawable(R.drawable.rec), null, null);
-            Toast toast = Toast.makeText(this, "PAUSED", Toast.LENGTH_SHORT);
-            toast.setGravity(Gravity.CENTER, 0, 0);
-            toast.show();
-            getWindow().clearFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
         }
         else{
-            if(useChargerConnection){
-                if(!isChargerConnected(this)){
-                    Toast toast = Toast.makeText(this, "Charger is disconnected", Toast.LENGTH_SHORT);
-                    toast.setGravity(Gravity.CENTER, 0, 0);
-                    toast.show();
-                    return;
-                }
-            }
-            if (prepareVideoRecorder()) {
-                mediaRecorder.start();
-                isRecording = true;
-                sw.start();
-                stopWatchText.setVisibility(View.VISIBLE);
-                recordButton.setCompoundDrawablesWithIntrinsicBounds(null, getResources().getDrawable(R.drawable.paus), null, null);
-                getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
-            } else {
-                releaseMediaRecorder();
-            }
+            Toast toast = Toast.makeText(this, "You do not have enough space left on the phone!", Toast.LENGTH_SHORT);
+            toast.setGravity(Gravity.CENTER, 0, 0);
+            toast.show();
         }
     }
 
     private boolean prepareVideoRecorder() {
 
         videoFile = getOutputMediaFile(2);
+
         Toast toast = Toast.makeText(this, videoFile.toString(), Toast.LENGTH_SHORT);
         toast.setGravity(Gravity.CENTER, 0, 0);
         toast.show();
@@ -477,6 +492,7 @@ public class MainActivity extends AppCompatActivity {
 
         if (type == MEDIA_TYPE_IMAGE){
             if(isExternalStorage){
+
                 File mediaStorageDir = new File(Environment.getExternalStorageDirectory(), "DVROne/Photo");
                 if (! mediaStorageDir.exists()){
                     if (! mediaStorageDir.mkdirs()){
@@ -493,6 +509,7 @@ public class MainActivity extends AppCompatActivity {
             }
         } else if(type == MEDIA_TYPE_VIDEO) {
             if(isExternalStorage){
+
                 File mediaStorageDir = new File(Environment.getExternalStorageDirectory(), "DVROne/Video");
                 if (! mediaStorageDir.exists()){
                     if (! mediaStorageDir.mkdirs()){
@@ -610,5 +627,12 @@ public class MainActivity extends AppCompatActivity {
         Intent intent = context.registerReceiver(null, new IntentFilter(Intent.ACTION_BATTERY_CHANGED));
         int plugged = intent.getIntExtra(BatteryManager.EXTRA_PLUGGED, -1);
         return plugged == BatteryManager.BATTERY_PLUGGED_AC || plugged == BatteryManager.BATTERY_PLUGGED_USB;
+    }
+    public boolean isExternalStorageWritable() {
+        String state = Environment.getExternalStorageState();
+        if (Environment.MEDIA_MOUNTED.equals(state)) {
+            return true;
+        }
+        return false;
     }
 }
