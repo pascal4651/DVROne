@@ -60,7 +60,7 @@
             android:key="videoQuality"
             android:entries="@array/videoQualityLabel"
             android:entryValues="@array/videoQualityValue"
-            android:defaultValue="HD 720"
+            android:defaultValue="High"
             android:summary="%s"
             android:title="Video Recording Quality"/>
         <EditTextPreference
@@ -82,7 +82,7 @@
             android:key="photoSizeKey"
             android:entries="@array/photoSizeLabel"
             android:entryValues="@array/photoSizeValue"
-            android:defaultValue="3096"
+            android:defaultValue="max"
             android:summary="%s"
             android:title="Picture Size"/>
     </PreferenceCategory>

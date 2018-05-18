@@ -88,7 +88,7 @@ public class MainActivity extends AppCompatActivity {
     private int maxMemorySize;
     private boolean deleteOldFiles;
 
-    private boolean mapEnabled;
+    private boolean mapEnabled, setupZoom;
     private GoogleMap mMap;
     private LocationManager manager;
     private LocationListener locListener;
@@ -304,6 +304,7 @@ public class MainActivity extends AppCompatActivity {
     }
 
     public void setupMap(){
+        setupZoom = true;
         mapFragment.getMapAsync(new OnMapReadyCallback() {
             @Override
             public void onMapReady(GoogleMap googleMap) {
@@ -347,12 +348,7 @@ public class MainActivity extends AppCompatActivity {
                         marker.remove();
                     }
                     marker = mMap.addMarker(new MarkerOptions().position(latLng));
-                    if(zoom == 0){
-                        zoom = startZoom;
-                    } else{
-                        zoom = mMap.getCameraPosition().zoom;
-                    }
-                    mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(latLng, zoom));
+                    zoomCamera(latLng);
                 } catch (IOException e) {
                     e.printStackTrace();
                     locationInfo.setText("");
@@ -375,6 +371,16 @@ public class MainActivity extends AppCompatActivity {
             }
         };
         manager.requestLocationUpdates(LocationManager.GPS_PROVIDER, 1000, 0, locListener);
+    }
+
+    public void zoomCamera(LatLng latLng){
+        if(setupZoom){
+            zoom = startZoom;
+            setupZoom = false;
+        } else{
+            zoom = mMap.getCameraPosition().zoom;
+        }
+        mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(latLng, zoom));
     }
 
     public void setCameraResolutions(String cameraPictureHeight){
