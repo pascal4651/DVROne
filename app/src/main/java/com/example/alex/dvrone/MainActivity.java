@@ -87,6 +87,7 @@ public class MainActivity extends AppCompatActivity {
     private File videoFile;
     private int maxMemorySize;
     private boolean deleteOldFiles;
+    private boolean isFlash;
 
     private boolean mapEnabled;
     private GoogleMap mMap;
@@ -275,6 +276,7 @@ public class MainActivity extends AppCompatActivity {
         FULL_SCREEN = sp.getBoolean("screenKey", true);
         useChargerConnection = sp.getBoolean("powerKey", false);
         setCamcorderProfile(sp.getString( "videoQuality", "High"));
+        isFlash = sp.getBoolean("flashKey", false);
 
         String storage = sp.getString("storageKey", "");
         isExternalStorage = storage.equals("gallery") ? false : true;
@@ -406,7 +408,23 @@ public class MainActivity extends AppCompatActivity {
                     parameters.setPictureSize(csLast.width, csLast.height);
                 }
             }
+            if(isFlash)
+            {
+                if(CAMERA_ID == 0)
+                {
+                    parameters.setFlashMode(parameters.FLASH_MODE_TORCH);
+                }
+                else
+                {
+                    parameters.setFlashMode(parameters.FLASH_MODE_OFF);
+                }
+            }
+            else
+            {
+                parameters.setFlashMode(parameters.FLASH_MODE_OFF);
+            }
         }
+
         camera.setParameters(parameters);
         Camera.Size pictureSize = camera.getParameters().getPictureSize();
         photoButton.setText(pictureSize.width + "x" + pictureSize.height);

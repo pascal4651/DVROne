@@ -27,6 +27,12 @@
             android:summaryOff="Off"
             android:summaryOn="On"
             android:title="Pause when charger is disconnected" />
+        <SwitchPreference
+            android:defaultValue="false"
+            android:key="flashKey"
+            android:summaryOff="Off"
+            android:summaryOn="On"
+            android:title="Flash" />
         <ListPreference
             android:key="storageKey"
             android:entries="@array/storageLabel"
