@@ -28,11 +28,22 @@
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent">
 
+        <TextView
+            android:id="@+id/textViewStopWatch"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_margin="10dp"
+            android:background="@drawable/roundedbutton"
+            android:text="00:00:00"
+            android:textColor="#f94a2f"
+            android:textSize="16dp"
+            android:visibility="invisible" />
+
         <Button
             android:id="@+id/buttonRecord"
             android:layout_width="70dp"
             android:layout_height="70dp"
-            android:layout_margin="20dp"
+            android:layout_margin="10dp"
             android:background="@drawable/roundedbutton"
             android:drawableTop="@drawable/rec"
             android:onClick="onClickRecord"
@@ -46,7 +57,7 @@
             android:id="@+id/buttonPhoto"
             android:layout_width="70dp"
             android:layout_height="70dp"
-            android:layout_margin="20dp"
+            android:layout_margin="10dp"
             android:background="@drawable/roundedbutton"
             android:drawableTop="@drawable/cam"
             android:onClick="onClickPicture"
@@ -61,7 +72,7 @@
         android:id="@+id/textViewStorage"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginEnd="2dp"
+        android:layout_marginEnd="10dp"
         android:layout_marginTop="60dp"
         android:background="@drawable/roundedbutton"
         android:gravity="right"
@@ -74,7 +85,7 @@
         android:id="@+id/textViewSpeed"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginStart="2dp"
+        android:layout_marginStart="10dp"
         android:layout_marginTop="60dp"
         android:background="@drawable/roundedbutton"
         android:text="0 km/h"
@@ -91,28 +102,16 @@
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintStart_toStartOf="parent">
 
-        <TextView
-            android:id="@+id/textViewStopWatch"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_margin="20dp"
-            android:background="@drawable/roundedbutton"
-            android:text="00:00:00"
-            android:textColor="#f94a2f"
-            android:textSize="20dp"
-            android:visibility="invisible" />
-
         <FrameLayout
             android:id="@+id/frameLayout"
             android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            >
+            android:layout_height="wrap_content">
 
             <fragment xmlns:android="http://schemas.android.com/apk/res/android"
                 xmlns:tools="http://schemas.android.com/tools"
                 android:layout_width="200dp"
                 android:layout_height="200dp"
-                android:layout_margin="20dp"
+                android:layout_margin="10dp"
                 android:id="@+id/mapFragmnet"
                 tools:context=".MapsActivity"
                 android:name="com.google.android.gms.maps.SupportMapFragment" />
