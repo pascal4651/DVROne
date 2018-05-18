@@ -96,6 +96,16 @@
             android:key="mapKey"
             android:summaryOff="Off"
             android:summaryOn="On"
-            android:title="Enable Map"/>
+            android:title="Enable GPS"/>
+        <EditTextPreference
+            android:defaultValue="15"
+            android:key="zoomKey"
+            android:selectAllOnFocus="true"
+            android:singleLine="true"
+            android:inputType="numberDecimal"
+            android:digits="0123456789"
+            android:summary="Not Selected"
+            android:maxLength="2"
+            android:title="Map Zoom" />
     </PreferenceCategory>
 </PreferenceScreen>

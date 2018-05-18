@@ -70,6 +70,20 @@
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintTop_toTopOf="parent" />
 
+    <TextView
+        android:id="@+id/textViewSpeed"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="2dp"
+        android:layout_marginTop="60dp"
+        android:background="@drawable/roundedbutton"
+        android:text="0 km/h"
+        android:textSize="24dp"
+        android:textColor="#b0fc85"
+        android:visibility="gone"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
+
     <LinearLayout
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"

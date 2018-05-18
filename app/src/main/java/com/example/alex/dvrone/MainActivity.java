@@ -67,11 +67,10 @@ public class MainActivity extends AppCompatActivity {
     private MediaRecorder mediaRecorder;
     private Button recordButton, photoButton;
     private ImageView focusImage;
-    private TextView storageTextView;
     private SurfaceHolder holder;
     private boolean isRecording;
     private Thread timeThread;
-    private TextView stopWatchText;
+    private TextView stopWatchText, locationInfo, storageTextView, speedTextView;
     private int degrees;
     private StopWatch sw;
     private int CAMERA_ID = 0;
@@ -93,8 +92,7 @@ public class MainActivity extends AppCompatActivity {
     private GoogleMap mMap;
     private LocationManager manager;
     private LocationListener locListener;
-    private float zoom = 0;
-    private TextView locationInfo;
+    private float zoom, startZoom;
     private Marker marker;
     private SupportMapFragment mapFragment;
 
@@ -143,11 +141,13 @@ public class MainActivity extends AppCompatActivity {
         stopWatchText = findViewById(R.id.textViewStopWatch);
         focusImage = findViewById(R.id.imageViewFocus);
         storageTextView = findViewById(R.id.textViewStorage);
+        speedTextView = findViewById(R.id.textViewSpeed);
         locationInfo = findViewById(R.id.textViewLocation);
         sp = PreferenceManager.getDefaultSharedPreferences(this);
         sw = new StopWatch();
         isRecording = false;
         degrees = 0;
+        zoom = 0;
         holder = surfaceView.getHolder();
         holder.setType(SurfaceHolder.SURFACE_TYPE_PUSH_BUFFERS);
         holder.addCallback(new SurfaceHolder.Callback() {
@@ -289,13 +289,16 @@ public class MainActivity extends AppCompatActivity {
         setCameraResolutions(sp.getString("photoSizeKey", "max"));
         maxMemorySize = Integer.parseInt(sp.getString("memorySizeKey", "0"));
         deleteOldFiles = sp.getBoolean("deleteFeilseKey", true);
+        startZoom = Integer.parseInt(sp.getString("zoomKey", "15"));
         mapEnabled = sp.getBoolean("mapKey", false);
         if(mapEnabled){
             mapFragment.getView().setVisibility(View.VISIBLE);
             locationInfo.setVisibility(View.VISIBLE);
+            speedTextView.setVisibility(View.VISIBLE);
             setupMap();
         } else{
             mapFragment.getView().setVisibility(View.GONE);
+            speedTextView.setVisibility(View.GONE);
             locationInfo.setVisibility(View.GONE);
         }
     }
@@ -321,6 +324,12 @@ public class MainActivity extends AppCompatActivity {
         locListener = new LocationListener() {
             @Override
             public void onLocationChanged(Location location) {
+                if (location == null){
+                    speedTextView.setText("0 km/h");
+                } else{
+                    int speed = (int)((location.getSpeed()*3600)/1000);
+                    speedTextView.setText(speed + " km/h");
+                }
                 //get the latitude and longitude from the location
                 double latitude = location.getLatitude();
                 double longitude = location.getLongitude();
@@ -339,7 +348,7 @@ public class MainActivity extends AppCompatActivity {
                     }
                     marker = mMap.addMarker(new MarkerOptions().position(latLng));
                     if(zoom == 0){
-                        zoom = 15;
+                        zoom = startZoom;
                     } else{
                         zoom = mMap.getCameraPosition().zoom;
                     }
