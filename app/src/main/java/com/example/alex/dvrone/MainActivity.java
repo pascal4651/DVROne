@@ -9,6 +9,11 @@ import android.content.pm.PackageManager;
 import android.graphics.Matrix;
 import android.graphics.RectF;
 import android.hardware.Camera;
+import android.location.Address;
+import android.location.Geocoder;
+import android.location.Location;
+import android.location.LocationListener;
+import android.location.LocationManager;
 import android.media.CamcorderProfile;
 import android.media.MediaRecorder;
 import android.media.MediaScannerConnection;
@@ -39,8 +44,18 @@ import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.google.android.gms.maps.CameraUpdateFactory;
+import com.google.android.gms.maps.GoogleMap;
+import com.google.android.gms.maps.OnMapReadyCallback;
+import com.google.android.gms.maps.SupportMapFragment;
+import com.google.android.gms.maps.model.BitmapDescriptorFactory;
+import com.google.android.gms.maps.model.LatLng;
+import com.google.android.gms.maps.model.Marker;
+import com.google.android.gms.maps.model.MarkerOptions;
+
 import java.io.File;
 import java.io.FileOutputStream;
+import java.io.IOException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.List;
@@ -73,6 +88,16 @@ public class MainActivity extends AppCompatActivity {
     private File videoFile;
     private int maxMemorySize;
     private boolean deleteOldFiles;
+
+    private boolean mapEnabled;
+    private GoogleMap mMap;
+    private LocationManager manager;
+    private LocationListener locListener;
+    private float zoom = 0;
+    private TextView locationInfo;
+    private Marker marker;
+    private SupportMapFragment mapFragment;
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -110,12 +135,15 @@ public class MainActivity extends AppCompatActivity {
                 WindowManager.LayoutParams.FLAG_FULLSCREEN);
         setContentView(R.layout.activity_main);
 
+        mapFragment = (SupportMapFragment) getSupportFragmentManager().findFragmentById(R.id.mapFragmnet);
+        mapFragment.getView().setVisibility(View.GONE);
         surfaceView = findViewById(R.id.surfaceView);
         recordButton = findViewById(R.id.buttonRecord);
         photoButton = findViewById(R.id.buttonPhoto);
         stopWatchText = findViewById(R.id.textViewStopWatch);
         focusImage = findViewById(R.id.imageViewFocus);
         storageTextView = findViewById(R.id.textViewStorage);
+        locationInfo = findViewById(R.id.textViewLocation);
         sp = PreferenceManager.getDefaultSharedPreferences(this);
         sw = new StopWatch();
         isRecording = false;
@@ -261,6 +289,83 @@ public class MainActivity extends AppCompatActivity {
         setCameraResolutions(sp.getString("photoSizeKey", "max"));
         maxMemorySize = Integer.parseInt(sp.getString("memorySizeKey", "0"));
         deleteOldFiles = sp.getBoolean("deleteFeilseKey", true);
+        mapEnabled = sp.getBoolean("mapKey", false);
+        if(mapEnabled){
+            mapFragment.getView().setVisibility(View.VISIBLE);
+            locationInfo.setVisibility(View.VISIBLE);
+            setupMap();
+        } else{
+            mapFragment.getView().setVisibility(View.GONE);
+            locationInfo.setVisibility(View.GONE);
+        }
+    }
+
+    public void setupMap(){
+        mapFragment.getMapAsync(new OnMapReadyCallback() {
+            @Override
+            public void onMapReady(GoogleMap googleMap) {
+                mMap = googleMap;
+            }
+        });
+        //get the location service
+        manager = (LocationManager) getSystemService(LOCATION_SERVICE);
+        //request the location update thru location manager
+        if (ActivityCompat.checkSelfPermission(this, android.Manifest.permission.ACCESS_FINE_LOCATION)
+                != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION)
+                != PackageManager.PERMISSION_GRANTED) {
+            // TODO: Consider calling
+            ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.ACCESS_FINE_LOCATION,
+                    Manifest.permission.ACCESS_COARSE_LOCATION, Manifest.permission.INTERNET}, 1);
+            return;
+        }
+        locListener = new LocationListener() {
+            @Override
+            public void onLocationChanged(Location location) {
+                //get the latitude and longitude from the location
+                double latitude = location.getLatitude();
+                double longitude = location.getLongitude();
+                //get the location name from latitude and longitude
+                Geocoder geocoder = new Geocoder(getApplicationContext());
+                try {
+                    List<Address> addresses = geocoder.getFromLocation(latitude, longitude, 1);
+                    String result = addresses.get(0).getSubLocality() != null ? addresses.get(0).getSubLocality()+":" : "";
+                    result += addresses.get(0).getLocality() != null ? addresses.get(0).getLocality()+":" : "";
+                    result += addresses.get(0).getCountryCode() != null ? addresses.get(0).getCountryCode() : "";
+                    locationInfo.setText(result);
+                    LatLng latLng = new LatLng(latitude, longitude);
+                    //mMap.clear();
+                    if(marker != null){
+                        marker.remove();
+                    }
+                    marker = mMap.addMarker(new MarkerOptions().position(latLng));
+                    if(zoom == 0){
+                        zoom = 15;
+                    } else{
+                        zoom = mMap.getCameraPosition().zoom;
+                    }
+                    mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(latLng, zoom));
+                } catch (IOException e) {
+                    e.printStackTrace();
+                    locationInfo.setText("");
+                }
+            }
+
+            @Override
+            public void onStatusChanged(String provider, int status, Bundle extras) {
+
+            }
+
+            @Override
+            public void onProviderEnabled(String provider) {
+
+            }
+
+            @Override
+            public void onProviderDisabled(String provider) {
+
+            }
+        };
+        manager.requestLocationUpdates(LocationManager.GPS_PROVIDER, 1000, 0, locListener);
     }
 
     public void setCameraResolutions(String cameraPictureHeight){
@@ -330,6 +435,9 @@ public class MainActivity extends AppCompatActivity {
         sw.stop();
         stopWatchText.setVisibility(View.INVISIBLE);
         getWindow().clearFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
+        if(manager != null){
+            manager.removeUpdates(locListener);
+        }
     }
 
     @Override
