@@ -27,6 +27,7 @@ import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.support.v7.widget.CardView;
 import android.util.Log;
 import android.view.Display;
 import android.view.Gravity;
@@ -57,8 +58,15 @@ import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.Date;
+import java.util.LinkedList;
 import java.util.List;
+import java.util.Queue;
+
+enum StorageType {Gallery, External, SDCard}
 
 public class MainActivity extends AppCompatActivity {
 
@@ -78,16 +86,15 @@ public class MainActivity extends AppCompatActivity {
     public static final int MEDIA_TYPE_IMAGE = 1;
     public static final int MEDIA_TYPE_VIDEO = 2;
     private SharedPreferences sp;
-    private int recordTimer;
     private int videoLengthSeconds;
     private boolean useChargerConnection;
-    private boolean isExternalStorage;
     private int camProfile;
     private int rotate;
     private File videoFile;
     private int maxMemorySize;
-    private boolean deleteOldFiles;
+    private boolean canDeleteOldFiles;
     private boolean isFlash;
+    private StorageType currentStorageType;
 
     private boolean mapEnabled, setupZoom;
     private GoogleMap mMap;
@@ -96,6 +103,7 @@ public class MainActivity extends AppCompatActivity {
     private float zoom, startZoom;
     private Marker marker;
     private SupportMapFragment mapFragment;
+    private CardView cardView;
 
 
     @Override
@@ -130,12 +138,10 @@ public class MainActivity extends AppCompatActivity {
 
         super.onCreate(savedInstanceState);
         requestWindowFeature(Window.FEATURE_NO_TITLE);
-        getWindow().setFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN,
-                WindowManager.LayoutParams.FLAG_FULLSCREEN);
+        getWindow().setFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN, WindowManager.LayoutParams.FLAG_FULLSCREEN);
         setContentView(R.layout.activity_main);
 
         mapFragment = (SupportMapFragment) getSupportFragmentManager().findFragmentById(R.id.mapFragmnet);
-        mapFragment.getView().setVisibility(View.GONE);
         surfaceView = findViewById(R.id.surfaceView);
         recordButton = findViewById(R.id.buttonRecord);
         photoButton = findViewById(R.id.buttonPhoto);
@@ -144,6 +150,7 @@ public class MainActivity extends AppCompatActivity {
         storageTextView = findViewById(R.id.textViewStorage);
         speedTextView = findViewById(R.id.textViewSpeed);
         locationInfo = findViewById(R.id.textViewLocation);
+        cardView = findViewById(R.id.cardView);
         sp = PreferenceManager.getDefaultSharedPreferences(this);
         sw = new StopWatch();
         isRecording = false;
@@ -195,16 +202,13 @@ public class MainActivity extends AppCompatActivity {
                                 else{
                                     sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
                                 }
-                                String dateString = sdf.format(date);
-                                getSupportActionBar().setTitle(dateString);
+                                getSupportActionBar().setTitle(sdf.format(date));
                                 storageTextView.setText("Free: " + StorageManager.bytesToHuman(StorageManager.getFreeExternalMemory()));
                                 if(isRecording){
                                     if(videoLengthSeconds > 0){
-                                        recordTimer++;
-                                        if(recordTimer >= videoLengthSeconds){
+                                        if(sw.getElapsedTimeSecs() >= videoLengthSeconds){
                                             recordButton.performClick();
                                             recordButton.performClick();
-                                            recordTimer = 0;
                                         }
                                     }
                                     stopWatchText.setText("REC: " + sw.toString());
@@ -215,6 +219,7 @@ public class MainActivity extends AppCompatActivity {
                     }
                 }
                 catch(InterruptedException e){
+                    e.printStackTrace();
                 }
             }
         };
@@ -234,7 +239,6 @@ public class MainActivity extends AppCompatActivity {
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
-
         // Inflate the menu; this adds items to the action bar if it is present.
         getMenuInflater().inflate(R.menu.main, menu);
         return true;
@@ -272,16 +276,12 @@ public class MainActivity extends AppCompatActivity {
     protected void onResume() {
         super.onResume();
         checkCameraHardware(this);
-        recordTimer = 0;
         FULL_SCREEN = sp.getBoolean("screenKey", true);
         useChargerConnection = sp.getBoolean("powerKey", false);
         setCamcorderProfile(sp.getString( "videoQuality", "High"));
         isFlash = sp.getBoolean("flashKey", false);
-
-        String storage = sp.getString("storageKey", "");
-        isExternalStorage = storage.equals("gallery") ? false : true;
-
-        videoLengthSeconds = 60 * Integer.parseInt(sp.getString("length", "0"));
+        setCurrentStorageType(sp.getString("storageKey", "external"));
+        videoLengthSeconds = 60 * Integer.parseInt(sp.getString("videoLengthKey", "0"));
         if(Integer.parseInt(sp.getString("cameraKey", "0")) == 1 && Camera.getNumberOfCameras() > 1){
             CAMERA_ID = 1;
         } else{
@@ -289,20 +289,21 @@ public class MainActivity extends AppCompatActivity {
         }
         camera = Camera.open(CAMERA_ID);
         setCameraResolutions(sp.getString("photoSizeKey", "max"));
-        maxMemorySize = Integer.parseInt(sp.getString("memorySizeKey", "0"));
-        deleteOldFiles = sp.getBoolean("deleteFeilseKey", true);
+        maxMemorySize = Integer.parseInt(sp.getString("memorySizeKey", "4"));
+        canDeleteOldFiles = sp.getBoolean("deleteFilesKey", false);
         startZoom = Integer.parseInt(sp.getString("zoomKey", "15"));
         mapEnabled = sp.getBoolean("mapKey", false);
+        float transparency = 0.01f * Integer.parseInt(sp.getString("transparencyKey", "70"));
         if(mapEnabled){
-            mapFragment.getView().setVisibility(View.VISIBLE);
-            locationInfo.setVisibility(View.VISIBLE);
+            cardView.setVisibility(View.VISIBLE);
+            cardView.setAlpha(transparency);
             speedTextView.setVisibility(View.VISIBLE);
             setupMap();
         } else{
-            mapFragment.getView().setVisibility(View.GONE);
+            cardView.setVisibility(View.GONE);
             speedTextView.setVisibility(View.GONE);
-            locationInfo.setVisibility(View.GONE);
         }
+        surfaceView.setVisibility(View.VISIBLE);
     }
 
     public void setupMap(){
@@ -385,6 +386,19 @@ public class MainActivity extends AppCompatActivity {
         mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(latLng, zoom));
     }
 
+    public void setCurrentStorageType(String storage){
+        switch (storage){
+            case "gallery":
+                currentStorageType = StorageType.Gallery;
+                break;
+            case "sdcard":
+                currentStorageType = StorageType.SDCard;
+                break;
+                default:
+                    currentStorageType = StorageType.External;
+        }
+    }
+
     public void setCameraResolutions(String cameraPictureHeight){
         Camera.Parameters parameters = camera.getParameters();
         // Check what resolutions are supported by your camera
@@ -414,21 +428,15 @@ public class MainActivity extends AppCompatActivity {
                     parameters.setPictureSize(csLast.width, csLast.height);
                 }
             }
-            if(isFlash)
-            {
-                if(CAMERA_ID == 0)
-                {
-                    parameters.setFlashMode(parameters.FLASH_MODE_TORCH);
-                }
-                else
-                {
-                    parameters.setFlashMode(parameters.FLASH_MODE_OFF);
-                }
-            }
-            else
-            {
+        }
+        if(isFlash) {
+            if(CAMERA_ID == 0) {
+                parameters.setFlashMode(parameters.FLASH_MODE_TORCH);
+            } else {
                 parameters.setFlashMode(parameters.FLASH_MODE_OFF);
             }
+        } else {
+            parameters.setFlashMode(parameters.FLASH_MODE_OFF);
         }
 
         camera.setParameters(parameters);
@@ -464,9 +472,9 @@ public class MainActivity extends AppCompatActivity {
             camera.release();
         camera = null;
         isRecording = false;
-        recordTimer = 0;
         sw.stop();
-        stopWatchText.setVisibility(View.INVISIBLE);
+        stopWatchText.setVisibility(View.GONE);
+        surfaceView.setVisibility(View.GONE);
         getWindow().clearFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
         if(manager != null){
             manager.removeUpdates(locListener);
@@ -529,7 +537,6 @@ public class MainActivity extends AppCompatActivity {
                     }
                 }
                 sw.stop();
-                recordTimer = 0;
                 stopWatchText.setVisibility(View.INVISIBLE);
                 isRecording = false;
                 recordButton.setCompoundDrawablesWithIntrinsicBounds(null, getResources().getDrawable(R.drawable.rec), null, null);
@@ -628,11 +635,10 @@ public class MainActivity extends AppCompatActivity {
     private File getOutputMediaFile(int type){
         // To be safe, you should check that the SDCard is mounted
         // using Environment.getExternalStorageState() before doing this.
-
         File mediaFile;
 
         if (type == MEDIA_TYPE_IMAGE){
-            if(isExternalStorage){
+            if(currentStorageType == StorageType.External){
 
                 File mediaStorageDir = new File(Environment.getExternalStorageDirectory(), "DVROne/Photo");
                 if (! mediaStorageDir.exists()){
@@ -649,7 +655,7 @@ public class MainActivity extends AppCompatActivity {
                 mediaFile = new File(Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_PICTURES) + File.separator + "IMG_"+ timeStamp + ".webp");
             }
         } else if(type == MEDIA_TYPE_VIDEO) {
-            if(isExternalStorage){
+            if(currentStorageType == StorageType.External){
 
                 File mediaStorageDir = new File(Environment.getExternalStorageDirectory(), "DVROne/Video");
                 if (! mediaStorageDir.exists()){
@@ -767,13 +773,69 @@ public class MainActivity extends AppCompatActivity {
     public boolean isChargerConnected(Context context) {
         Intent intent = context.registerReceiver(null, new IntentFilter(Intent.ACTION_BATTERY_CHANGED));
         int plugged = intent.getIntExtra(BatteryManager.EXTRA_PLUGGED, -1);
-        return plugged == BatteryManager.BATTERY_PLUGGED_AC || plugged == BatteryManager.BATTERY_PLUGGED_USB;
+        return plugged == BatteryManager.BATTERY_PLUGGED_AC || plugged == BatteryManager.BATTERY_PLUGGED_USB
+                || plugged == BatteryManager.BATTERY_PLUGGED_WIRELESS;
     }
+
     public boolean isExternalStorageWritable() {
         String state = Environment.getExternalStorageState();
         if (Environment.MEDIA_MOUNTED.equals(state)) {
             return true;
         }
         return false;
+    }
+
+    public void checkDir(){
+        File currentDir = new File(Environment.getExternalStorageDirectory(), "DVROne");
+        long currentDirSize = StorageManager.getDirSize(currentDir);
+        boolean isDirFreeSpace = currentDirSize < maxMemorySize * 1073741824 && currentDirSize < StorageManager.getFreeExternalMemory();
+        if(!isDirFreeSpace){
+            if(canDeleteOldFiles){
+                List<File> filesList = getFilesFromDir(currentDir.getAbsolutePath());
+                try{
+                    while (StorageManager.getDirSize(currentDir) > currentDirSize/2){
+                        filesList.get(0).delete();
+                        filesList.remove(0);
+                    }
+                }catch(Exception e){
+                    e.printStackTrace();
+                }
+            } else{
+                Toast toast = Toast.makeText(this, "There is no more free space!", Toast.LENGTH_SHORT);
+                toast.setGravity(Gravity.CENTER, 0, 0);
+                toast.show();
+            }
+        }
+    }
+
+    public List<File> getFilesFromDir(String path){
+        List<File> allFiles = new ArrayList();
+        Queue<File> dirs = new LinkedList();
+        dirs.add(new File(path));
+        while (!dirs.isEmpty()) {
+            for (File f : dirs.poll().listFiles()) {
+                if (f.isDirectory()) {
+                    dirs.add(f);
+                } else if (f.isFile()) {
+                    allFiles.add(f);
+                }
+            }
+        }
+        if(allFiles.size() > 1){
+            Collections.sort(allFiles, new Comparator<File>() {
+                @Override
+                public int compare(File file1, File file2) {
+                    long k = file1.lastModified() - file2.lastModified();
+                    if(k > 0){
+                        return 1;
+                    }else if(k == 0){
+                        return 0;
+                    }else{
+                        return -1;
+                    }
+                }
+            });
+        }
+        return allFiles;
     }
 }

@@ -41,7 +41,7 @@
             android:summary="%s"
             android:title="Storage"/>
         <EditTextPreference
-            android:defaultValue="1"
+            android:defaultValue="10"
             android:key="memorySizeKey"
             android:selectAllOnFocus="true"
             android:singleLine="true"
@@ -71,7 +71,7 @@
             android:title="Video Recording Quality"/>
         <EditTextPreference
             android:defaultValue="10"
-            android:key="length"
+            android:key="videoLengthKey"
             android:selectAllOnFocus="true"
             android:singleLine="true"
             android:inputType="numberDecimal"
@@ -114,4 +114,11 @@
             android:maxLength="2"
             android:title="Map Zoom" />
     </PreferenceCategory>
+    <ListPreference
+        android:key="transparencyKey"
+        android:entries="@array/transparencyLabel"
+        android:entryValues="@array/transparencyValue"
+        android:defaultValue="70"
+        android:summary="%s"
+        android:title="Transparency"/>
 </PreferenceScreen>

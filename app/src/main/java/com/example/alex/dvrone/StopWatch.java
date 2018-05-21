@@ -18,6 +18,7 @@ public class StopWatch {
         this.running = false;
         currentTime = System.currentTimeMillis() - startTime;
     }
+
     public void resume() {
         this.running = true;
         this.startTime = System.currentTimeMillis() - currentTime;

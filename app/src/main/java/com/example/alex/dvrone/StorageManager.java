@@ -5,6 +5,7 @@ import android.os.Environment;
 import android.os.StatFs;
 
 import java.io.File;
+import java.io.IOException;
 import java.text.DecimalFormat;
 
 public class StorageManager {
@@ -29,7 +30,7 @@ public class StorageManager {
     }
 
     // Get free space for provided path
-// Note that this will throw IllegalArgumentException for invalid paths
+    // Note that this will throw IllegalArgumentException for invalid paths
     public static long getFreeMemory(File path)
     {
         StatFs stats = new StatFs(path.getAbsolutePath());
@@ -74,5 +75,47 @@ public class StorageManager {
         if (size >= Eb)                 return floatForm((double)size / Eb) + " Eb";
 
         return "???";
+    }
+
+    public static long getDirSize(File dir){
+        if (!isValidDir(dir))
+            return 0L;
+        File[] files = dir.listFiles();
+        //Guard for null pointer exception on files
+        if (files == null){
+            return 0L;
+        }else{
+            long size = 0L;
+            for(File file : files){
+                if (file.isFile()){
+                    size += file.length();
+                }else{
+                    try{
+                        if (!isSymlink(file)) size += getDirSize(file);
+                    }catch (IOException ioe){
+                        //digest exception
+                    }
+                }
+            }
+            return size;
+        }
+    }
+
+    public static boolean isSymlink(File file) throws IOException {
+        File canon;
+        if (file.getParent() == null) {
+            canon = file;
+        } else {
+            canon = new File(file.getParentFile().getCanonicalFile(), file.getName());
+        }
+        return !canon.getCanonicalFile().equals(canon.getAbsoluteFile());
+    }
+
+    private static boolean isValidDir(File dir){
+        if (dir != null && dir.exists() && dir.isDirectory()){
+            return true;
+        }else{
+            return false;
+        }
     }
 }

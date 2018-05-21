@@ -5,7 +5,7 @@
         <shape android:shape="rectangle">
             <corners android:radius="4dp" />
             <solid android:color="@color/actionbar_background" />
-            <stroke android:width="0.5dip" android:color="#fffa00" />
+            <stroke android:width="0.2dip" android:color="#fffa00" />
             <padding
                 android:bottom="5dp"
                 android:left="5dp"
