@@ -26,11 +26,27 @@ public class ImageGetter extends AsyncTask<File, Void, Bitmap> {
 
     private Bitmap decodeFile(File f) {
         String extension = f.getAbsolutePath().substring(f.getAbsolutePath().lastIndexOf("."));
+        Bitmap thumbImage = null;
         if(extension.equals(".mp4")){
-            Bitmap ThumbImage = ThumbnailUtils.createVideoThumbnail(f.getAbsolutePath(), MediaStore.Video.Thumbnails.MINI_KIND);
-            return Bitmap.createScaledBitmap(ThumbImage, 300, 300, false);
+            try{
+                thumbImage = ThumbnailUtils.createVideoThumbnail(f.getAbsolutePath(), MediaStore.Video.Thumbnails.MINI_KIND);
+            } catch(Exception e){
+                e.printStackTrace();
+            }
+            if(thumbImage == null){
+                thumbImage = Bitmap.createBitmap(300, 300, Bitmap.Config.ARGB_8888);
+            }
+            return Bitmap.createScaledBitmap(thumbImage, 300, 300, false);
         } else{
-            return Bitmap.createScaledBitmap(BitmapFactory.decodeFile(f.getAbsolutePath()), 300, 300, false);
+            try{
+                thumbImage = Bitmap.createScaledBitmap(BitmapFactory.decodeFile(f.getAbsolutePath()), 300, 300, false);
+            } catch(Exception e){
+                e.printStackTrace();
+            }
+            if(thumbImage == null){
+                thumbImage = Bitmap.createBitmap(300, 300, Bitmap.Config.ARGB_8888);
+            }
+            return thumbImage;
         }
     }
 }

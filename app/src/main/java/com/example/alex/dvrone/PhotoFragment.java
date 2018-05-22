@@ -68,53 +68,56 @@ public class PhotoFragment extends Fragment implements View.OnClickListener {
         Log.d("Files", "Path: " + path);
         File directory = new File(path);
         files = directory.listFiles();
-        fileNames = new String[files.length];
-        filesForDelete = new File[files.length];
-        Log.d("Files", "Size: "+ files.length);
-        for (int i = 0; i < files.length; i++)
-        {
-            fileNames[i] = files[i].getName();
-        }
+        if(files != null){
+            fileNames = new String[files.length];
+            filesForDelete = new File[files.length];
+            Log.d("Files", "Size: "+ files.length);
+            for (int i = 0; i < files.length; i++)
+            {
+                fileNames[i] = files[i].getName();
+            }
 
-        gridview = (GridView) view.findViewById(R.id.gridview);
-        gridview.setAdapter(new ImageAdapter(this.getContext(), files, fileNames));
+            gridview = (GridView) view.findViewById(R.id.gridview);
+            gridview.setAdapter(new ImageAdapter(this.getContext(), files, fileNames));
 
-        gridview.setOnItemClickListener(new AdapterView.OnItemClickListener() {
-            public void onItemClick(AdapterView<?> parent, View v,
-                                    int i, long id) {
+            gridview.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+                public void onItemClick(AdapterView<?> parent, View v,
+                                        int i, long id) {
 
-                if (isSelection) {
-                    if (filesForDelete[i] == null) {
-                        filesForDelete[i] = files[i];
-                        v.setBackgroundColor(Color.YELLOW);
+                    if (isSelection) {
+                        if (filesForDelete[i] == null) {
+                            filesForDelete[i] = files[i];
+                            v.setBackgroundColor(Color.YELLOW);
+                        } else {
+                            filesForDelete[i] = null;
+                            v.setBackgroundColor(Color.WHITE);
+                            checkFilesForDelete();
+                        }
                     } else {
-                        filesForDelete[i] = null;
-                        v.setBackgroundColor(Color.WHITE);
-                        checkFilesForDelete();
+                        currentIndex = i;
+                        Intent intent = new Intent(getActivity(), GalleryActivityImage.class);
+                        startActivity(intent);
                     }
-                } else {
-                    currentIndex = i;
-                    Intent intent = new Intent(getActivity(), GalleryActivityImage.class);
-                    startActivity(intent);
                 }
-            }
-        });
-        gridview.setOnItemLongClickListener(new AdapterView.OnItemLongClickListener() {
-            @Override
-            public boolean onItemLongClick(AdapterView<?> parent, View view, int i, long id) {
+            });
+            gridview.setOnItemLongClickListener(new AdapterView.OnItemLongClickListener() {
+                @Override
+                public boolean onItemLongClick(AdapterView<?> parent, View view, int i, long id) {
 
-                isSelection = !isSelection;
-                if (isSelection) {
-                    controlsLayout.setVisibility(View.VISIBLE);
-                    view.setBackgroundColor(Color.YELLOW);
-                    filesForDelete[i] = files[i];
-                } else {
-                    buttonCancel.performClick();
+                    isSelection = !isSelection;
+                    if (isSelection) {
+                        controlsLayout.setVisibility(View.VISIBLE);
+                        view.setBackgroundColor(Color.YELLOW);
+                        filesForDelete[i] = files[i];
+                    } else {
+                        buttonCancel.performClick();
+                    }
+                    return true;
                 }
-                return true;
-            }
-        });
+            });
+        }
     }
+
     public void checkFilesForDelete() {
         for (File f : filesForDelete) {
             if (f != null) {

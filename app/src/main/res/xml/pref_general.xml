@@ -41,13 +41,12 @@
             android:summary="%s"
             android:title="Storage"/>
         <EditTextPreference
-            android:defaultValue="10"
+            android:defaultValue="4"
             android:key="memorySizeKey"
             android:selectAllOnFocus="true"
             android:singleLine="true"
             android:inputType="numberDecimal"
             android:digits="0123456789"
-            android:summary="Not Selected"
             android:maxLength="2"
             android:title="Max Storage Capacity (GBytes)" />
         <CheckBoxPreference

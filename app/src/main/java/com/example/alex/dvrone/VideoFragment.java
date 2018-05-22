@@ -76,9 +76,8 @@ public class VideoFragment extends Fragment implements View.OnClickListener {
         File directory = new File(path);
 
         files = directory.listFiles();
-        filesForDelete = new File[files.length];
-
         if (files != null) {
+            filesForDelete = new File[files.length];
             fileNames = new String[files.length];
             Log.d("Files", "Size: " + files.length);
             for (int i = 0; i < files.length; i++) {

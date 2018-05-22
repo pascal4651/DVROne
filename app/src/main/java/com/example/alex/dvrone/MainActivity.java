@@ -40,7 +40,6 @@ import android.view.View;
 import android.view.Window;
 import android.view.WindowManager;
 import android.widget.Button;
-import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -49,7 +48,6 @@ import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.SupportMapFragment;
-import com.google.android.gms.maps.model.BitmapDescriptorFactory;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
@@ -58,13 +56,8 @@ import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.text.SimpleDateFormat;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Comparator;
 import java.util.Date;
-import java.util.LinkedList;
 import java.util.List;
-import java.util.Queue;
 
 enum StorageType {Gallery, External, SDCard}
 
@@ -91,7 +84,7 @@ public class MainActivity extends AppCompatActivity {
     private int camProfile;
     private int rotate;
     private File videoFile;
-    private int maxMemorySize;
+    private long maxMemorySize;
     private boolean canDeleteOldFiles;
     private boolean isFlash;
     private StorageType currentStorageType;
@@ -205,6 +198,7 @@ public class MainActivity extends AppCompatActivity {
                                 getSupportActionBar().setTitle(sdf.format(date));
                                 storageTextView.setText("Free: " + StorageManager.bytesToHuman(StorageManager.getFreeExternalMemory()));
                                 if(isRecording){
+                                    isEnoughFolderSpace();
                                     if(videoLengthSeconds > 0){
                                         if(sw.getElapsedTimeSecs() >= videoLengthSeconds){
                                             recordButton.performClick();
@@ -289,7 +283,7 @@ public class MainActivity extends AppCompatActivity {
         }
         camera = Camera.open(CAMERA_ID);
         setCameraResolutions(sp.getString("photoSizeKey", "max"));
-        maxMemorySize = Integer.parseInt(sp.getString("memorySizeKey", "4"));
+        maxMemorySize = Long.parseLong(sp.getString("memorySizeKey", "4")) * 1073741824;
         canDeleteOldFiles = sp.getBoolean("deleteFilesKey", false);
         startZoom = Integer.parseInt(sp.getString("zoomKey", "15"));
         mapEnabled = sp.getBoolean("mapKey", false);
@@ -489,28 +483,30 @@ public class MainActivity extends AppCompatActivity {
 
     public void onClickPicture(View view) {
         if(isExternalStorageWritable()) {
-            if (isRecording) {
-                recordButton.performClick();
-            }
-            try {
-                final File photoFile = getOutputMediaFile(1);
-                camera.takePicture(null, null, new Camera.PictureCallback() {
-                    @Override
-                    public void onPictureTaken(byte[] data, Camera camera) {
-                        try {
-                            FileOutputStream fos = new FileOutputStream(photoFile);
-                            fos.write(data);
-                            fos.close();
-                        } catch (Exception e) {
-                            e.printStackTrace();
+            if(isEnoughFolderSpace()) {
+                if (isRecording) {
+                    recordButton.performClick();
+                }
+                try {
+                    final File photoFile = getOutputMediaFile(1);
+                    camera.takePicture(null, null, new Camera.PictureCallback() {
+                        @Override
+                        public void onPictureTaken(byte[] data, Camera camera) {
+                            try {
+                                FileOutputStream fos = new FileOutputStream(photoFile);
+                                fos.write(data);
+                                fos.close();
+                            } catch (Exception e) {
+                                e.printStackTrace();
+                            }
                         }
-                    }
-                });
-                Toast toast = Toast.makeText(this, photoFile.toString(), Toast.LENGTH_SHORT);
-                toast.setGravity(Gravity.CENTER, 0, 0);
-                toast.show();
-            } catch (Exception e) {
-                e.printStackTrace();
+                    });
+                    Toast toast = Toast.makeText(this, photoFile.toString(), Toast.LENGTH_SHORT);
+                    toast.setGravity(Gravity.CENTER, 0, 0);
+                    toast.show();
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
             }
             camera.startPreview();
         }
@@ -553,15 +549,17 @@ public class MainActivity extends AppCompatActivity {
                         return;
                     }
                 }
-                if (prepareVideoRecorder()) {
-                    mediaRecorder.start();
-                    isRecording = true;
-                    sw.start();
-                    stopWatchText.setVisibility(View.VISIBLE);
-                    recordButton.setCompoundDrawablesWithIntrinsicBounds(null, getResources().getDrawable(R.drawable.paus), null, null);
-                    getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
-                } else {
-                    releaseMediaRecorder();
+                if(isEnoughFolderSpace()){
+                    if (prepareVideoRecorder()) {
+                        mediaRecorder.start();
+                        isRecording = true;
+                        sw.start();
+                        stopWatchText.setVisibility(View.VISIBLE);
+                        recordButton.setCompoundDrawablesWithIntrinsicBounds(null, getResources().getDrawable(R.drawable.paus), null, null);
+                        getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
+                    } else {
+                        releaseMediaRecorder();
+                    }
                 }
             }
         }
@@ -591,8 +589,6 @@ public class MainActivity extends AppCompatActivity {
 
         mediaRecorder.setOutputFile(videoFile.getAbsolutePath());
         mediaRecorder.setPreviewDisplay(surfaceView.getHolder().getSurface());
-        //mediaRecorder.setMaxDuration(15000); // Set max duration 15 sec.
-        //mediaRecorder.setMaxFileSize(10000000); // Set max file size 1M
 
         try {
             mediaRecorder.prepare();
@@ -676,7 +672,7 @@ public class MainActivity extends AppCompatActivity {
         }
         // initiate media scan and put the new things into the path array to
         // make the scanner aware of the location and the files you want to see
-        MediaScannerConnection.scanFile(this, new String[] {mediaFile.getPath()}, null, null);
+        MediaScannerConnection.scanFile(this, new String[] {mediaFile.getAbsolutePath()}, null, null);
 
         return mediaFile;
     }
@@ -785,15 +781,28 @@ public class MainActivity extends AppCompatActivity {
         return false;
     }
 
-    public void checkDir(){
+    public boolean isEnoughFolderSpace(){
         File currentDir = new File(Environment.getExternalStorageDirectory(), "DVROne");
         long currentDirSize = StorageManager.getDirSize(currentDir);
-        boolean isDirFreeSpace = currentDirSize < maxMemorySize * 1073741824 && currentDirSize < StorageManager.getFreeExternalMemory();
-        if(!isDirFreeSpace){
+        if(currentDirSize < maxMemorySize){
+            return true;
+        } else{
             if(canDeleteOldFiles){
-                List<File> filesList = getFilesFromDir(currentDir.getAbsolutePath());
+                List<File> filesList = StorageManager.getSortedFilesFromDir(currentDir);
                 try{
-                    while (StorageManager.getDirSize(currentDir) > currentDirSize/2){
+                    while (StorageManager.getDirSize(currentDir) > (long)(maxMemorySize * 0.5)){
+                        if(filesList.size() < 2){
+                            if(StorageManager.getDirSize(currentDir) >= maxMemorySize){
+                                Toast toast = Toast.makeText(this, currentDir.getAbsolutePath() + " is full", Toast.LENGTH_SHORT);
+                                toast.setGravity(Gravity.CENTER, 0, 0);
+                                toast.show();
+                                if(isRecording){
+                                    recordButton.performClick();
+                                }
+                                return false;
+                            }
+                            break;
+                        }
                         filesList.get(0).delete();
                         filesList.remove(0);
                     }
@@ -801,41 +810,14 @@ public class MainActivity extends AppCompatActivity {
                     e.printStackTrace();
                 }
             } else{
-                Toast toast = Toast.makeText(this, "There is no more free space!", Toast.LENGTH_SHORT);
+                Toast toast = Toast.makeText(this, currentDir.getAbsolutePath() + " is full", Toast.LENGTH_SHORT);
                 toast.setGravity(Gravity.CENTER, 0, 0);
                 toast.show();
-            }
-        }
-    }
-
-    public List<File> getFilesFromDir(String path){
-        List<File> allFiles = new ArrayList();
-        Queue<File> dirs = new LinkedList();
-        dirs.add(new File(path));
-        while (!dirs.isEmpty()) {
-            for (File f : dirs.poll().listFiles()) {
-                if (f.isDirectory()) {
-                    dirs.add(f);
-                } else if (f.isFile()) {
-                    allFiles.add(f);
+                if(isRecording){
+                    recordButton.performClick();
                 }
             }
         }
-        if(allFiles.size() > 1){
-            Collections.sort(allFiles, new Comparator<File>() {
-                @Override
-                public int compare(File file1, File file2) {
-                    long k = file1.lastModified() - file2.lastModified();
-                    if(k > 0){
-                        return 1;
-                    }else if(k == 0){
-                        return 0;
-                    }else{
-                        return -1;
-                    }
-                }
-            });
-        }
-        return allFiles;
+        return StorageManager.getDirSize(currentDir) < maxMemorySize;
     }
 }

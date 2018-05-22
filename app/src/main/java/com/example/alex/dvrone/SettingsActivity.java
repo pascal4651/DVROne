@@ -38,7 +38,7 @@ public class SettingsActivity extends PreferenceActivity {
         maxMemorySize.setOnPreferenceChangeListener(new Preference.OnPreferenceChangeListener() {
             @Override
             public boolean onPreferenceChange(Preference preference, Object o) {
-                lengthPref.setSummary(o.toString());
+                maxMemorySize.setSummary(o.toString());
                 return true;
             }
         });
