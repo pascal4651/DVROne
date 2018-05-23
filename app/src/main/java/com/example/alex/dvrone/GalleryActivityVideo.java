@@ -116,7 +116,7 @@ public class GalleryActivityVideo extends AppCompatActivity implements View.OnTo
         builder.setTitle("Details")
                 .setIcon(android.R.drawable.ic_menu_info_details)
                 .setMessage(Html.fromHtml("<b>FULL PATH: </b>" + "<small><i>" +  file.getAbsolutePath() + "</i></small>"
-                        + "<br><br><b>TYPE: </b><i>photo</i><br><br><b>SIZE: </b><i>" + StorageManager.bytesToHuman(file.length()) + "</i>"
+                        + "<br><br><b>TYPE: </b><i>video</i><br><br><b>SIZE: </b><i>" + StorageManager.bytesToHuman(file.length()) + "</i>"
                         + "<br><br><b>RESOLUTION: </b><i>" + getResolutionToString(file) + "</i>"))
                 .setPositiveButton("Close", null).create();
         builder.show();
