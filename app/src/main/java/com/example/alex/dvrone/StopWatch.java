@@ -63,4 +63,12 @@ public class StopWatch {
         //return getElapsedTimeHour() + ":" + getElapsedTimeMin() + ":" + getElapsedTimeSecs() + "." + getElapsedTimeMili();
         return String.format("%02d", getElapsedTimeHour()) + ":" + String.format("%02d", getElapsedTimeMin()) + ":" + String.format("%02d", getElapsedTimeSecs());
     }
+
+    public long getDeltaTimeSecs(){
+        long elapsed = 0;
+        if (running) {
+            elapsed = ((System.currentTimeMillis() - startTime) / 1000);
+        }
+        return elapsed;
+    }
 }

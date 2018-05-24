@@ -79,7 +79,7 @@ public class MainActivity extends AppCompatActivity {
     public static final int MEDIA_TYPE_IMAGE = 1;
     public static final int MEDIA_TYPE_VIDEO = 2;
     private SharedPreferences sp;
-    private int videoLengthSeconds;
+    private long videoLengthSeconds;
     private boolean useChargerConnection;
     private int camProfile;
     private int rotate;
@@ -199,7 +199,7 @@ public class MainActivity extends AppCompatActivity {
                                 if(isRecording){
                                     isEnoughFolderSpace();
                                     if(videoLengthSeconds > 0){
-                                        if(sw.getElapsedTimeSecs() >= videoLengthSeconds){
+                                        if(sw.getDeltaTimeSecs() >= videoLengthSeconds){
                                             recordButton.performClick();
                                             recordButton.performClick();
                                         }
@@ -274,7 +274,8 @@ public class MainActivity extends AppCompatActivity {
         setCamcorderProfile(sp.getString( "videoQuality", "High"));
         isFlash = sp.getBoolean("flashKey", false);
         setCurrentStorageType(sp.getString("storageKey", "external"));
-        videoLengthSeconds = 60 * Integer.parseInt(sp.getString("videoLengthKey", "0"));
+        videoLengthSeconds = 60 * Long.parseLong(sp.getString("videoLengthKey", "0"));
+        //videoLengthSeconds = 10;
         if(Integer.parseInt(sp.getString("cameraKey", "0")) == 1 && Camera.getNumberOfCameras() > 1){
             CAMERA_ID = 1;
         } else{
