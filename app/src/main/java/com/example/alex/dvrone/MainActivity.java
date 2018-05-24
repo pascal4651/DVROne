@@ -98,7 +98,6 @@ public class MainActivity extends AppCompatActivity {
     private SupportMapFragment mapFragment;
     private CardView cardView;
 
-
     @Override
     protected void onCreate(Bundle savedInstanceState) {
 
