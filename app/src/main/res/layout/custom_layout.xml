@@ -15,7 +15,6 @@
         android:text="new text"
         android:id="@+id/imgText"
         android:layout_below="@+id/imageview"
-        android:textSize="9dp"
-        />
+        android:textSize="10dp" />
 
 </RelativeLayout>

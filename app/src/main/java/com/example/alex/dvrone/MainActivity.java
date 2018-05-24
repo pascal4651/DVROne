@@ -532,7 +532,7 @@ public class MainActivity extends AppCompatActivity {
                     }
                 }
                 sw.stop();
-                stopWatchText.setVisibility(View.INVISIBLE);
+                stopWatchText.setVisibility(View.GONE);
                 isRecording = false;
                 recordButton.setCompoundDrawablesWithIntrinsicBounds(null, getResources().getDrawable(R.drawable.rec), null, null);
                 Toast toast = Toast.makeText(this, "PAUSED", Toast.LENGTH_SHORT);
@@ -553,6 +553,7 @@ public class MainActivity extends AppCompatActivity {
                         mediaRecorder.start();
                         isRecording = true;
                         sw.start();
+                        stopWatchText.setText("REC: 00:00:00");
                         stopWatchText.setVisibility(View.VISIBLE);
                         recordButton.setCompoundDrawablesWithIntrinsicBounds(null, getResources().getDrawable(R.drawable.paus), null, null);
                         getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
