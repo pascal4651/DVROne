@@ -5,7 +5,6 @@ import android.os.Environment;
 import android.os.StatFs;
 
 import java.io.File;
-import java.io.IOException;
 import java.text.DecimalFormat;
 import java.util.ArrayList;
 import java.util.Collections;
